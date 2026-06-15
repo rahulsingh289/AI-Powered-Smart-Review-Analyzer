@@ -1,6 +1,9 @@
+import { Link } from "react-router-dom";
+
 function Navbar() {
     return (
         <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200">
+
             <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between">
 
                 <div className="flex items-center gap-3">
@@ -21,33 +24,33 @@ function Navbar() {
 
                 <div className="flex flex-wrap gap-6 mt-4 md:mt-0 text-gray-700 font-medium">
 
-                    <a
-                        href="/"
+                    <Link
+                        to="/"
                         className="hover:text-blue-600 transition duration-300"
                     >
                         Home
-                    </a>
+                    </Link>
 
-                    <a
-                        href="/about"
+                    <Link
+                        to="/about"
                         className="hover:text-blue-600 transition duration-300"
                     >
                         About
-                    </a>
+                    </Link>
 
-                    <a
-                        href="/dashboard"
+                    <Link
+                        to="/dashboard"
                         className="hover:text-blue-600 transition duration-300"
                     >
                         Dashboard
-                    </a>
+                    </Link>
 
-                    <a
-                        href="/login"
+                    <Link
+                        to="/login"
                         className="hover:text-blue-600 transition duration-300"
                     >
                         Login
-                    </a>
+                    </Link>
 
                 </div>
 
@@ -56,6 +59,7 @@ function Navbar() {
                 </button>
 
             </div>
+
         </nav>
     );
 }
