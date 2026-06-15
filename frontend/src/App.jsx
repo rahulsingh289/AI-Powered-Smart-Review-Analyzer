@@ -1,122 +1,94 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Card from "./components/Card";
+import Footer from "./components/Footer";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+      <Navbar />
+
+      <Hero />
+
+      {/* Features Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl font-bold text-gray-900">
+            Powerful AI Features
+          </h2>
+          <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+            Turn thousands of customer reviews into actionable business
+            intelligence using advanced AI-powered analysis.
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
 
-      <div className="ticks"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Card
+            title="📊 Sentiment Analysis"
+            description="Detect positive, negative, and neutral customer emotions with intelligent AI models."
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+          <Card
+            title="🏷️ Smart Classification"
+            description="Automatically categorize reviews into topics such as service, quality, delivery, and support."
+          />
+
+          <Card
+            title="🧠 AI Insights"
+            description="Generate business recommendations and discover hidden patterns in customer feedback."
+          />
         </div>
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      {/* Statistics Section */}
+      <section className="bg-gradient-to-r from-slate-50 to-blue-50 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold">
+              Trusted Performance
+            </h2>
+            <p className="text-gray-600 mt-3">
+              Delivering reliable insights from customer reviews.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <div className="bg-white p-8 rounded-2xl shadow-lg text-center hover:scale-105 transition">
+              <h3 className="text-5xl font-bold text-blue-600">
+                1000+
+              </h3>
+              <p className="mt-3 text-gray-600">
+                Reviews Processed
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-lg text-center hover:scale-105 transition">
+              <h3 className="text-5xl font-bold text-green-600">
+                95%
+              </h3>
+              <p className="mt-3 text-gray-600">
+                Prediction Accuracy
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-lg text-center hover:scale-105 transition">
+              <h3 className="text-5xl font-bold text-purple-600">
+                24/7
+              </h3>
+              <p className="mt-3 text-gray-600">
+                Real-Time Monitoring
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
