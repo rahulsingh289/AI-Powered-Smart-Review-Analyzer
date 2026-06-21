@@ -1,9 +1,13 @@
 import { Link } from "react-router-dom";
 
-function Navbar() {
+function Navbar({ darkMode, setDarkMode }) {
     return (
-        <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200">
-
+        <nav
+            className={`sticky top-0 z-50 backdrop-blur-md shadow-md border-b ${darkMode
+                    ? "bg-gray-900 border-gray-700 text-white"
+                    : "bg-white/90 border-gray-200 text-gray-900"
+                }`}
+        >
             <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between">
 
                 <div className="flex items-center gap-3">
@@ -12,54 +16,37 @@ function Navbar() {
                     </div>
 
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900">
+                        <h1 className="text-xl font-bold">
                             Smart Review Analyzer
                         </h1>
 
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs opacity-70">
                             AI-Powered Insights
                         </p>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-6 mt-4 md:mt-0 text-gray-700 font-medium">
-
-                    <Link
-                        to="/"
-                        className="hover:text-blue-600 transition duration-300"
-                    >
-                        Home
-                    </Link>
-
-                    <Link
-                        to="/about"
-                        className="hover:text-blue-600 transition duration-300"
-                    >
-                        About
-                    </Link>
-
-                    <Link
-                        to="/dashboard"
-                        className="hover:text-blue-600 transition duration-300"
-                    >
-                        Dashboard
-                    </Link>
-
-                    <Link
-                        to="/login"
-                        className="hover:text-blue-600 transition duration-300"
-                    >
-                        Login
-                    </Link>
-
+                <div className="flex flex-wrap gap-6 mt-4 md:mt-0 font-medium">
+                    <Link to="/">Home</Link>
+                    <Link to="/about">About</Link>
+                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/login">Login</Link>
                 </div>
 
-                <button className="mt-4 md:mt-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2 rounded-lg hover:scale-105 transition">
-                    Get Started
-                </button>
+                <div className="flex gap-3 mt-4 md:mt-0">
+                    <button
+                        onClick={() => setDarkMode(!darkMode)}
+                        className="bg-gray-700 text-white px-4 py-2 rounded-lg"
+                    >
+                        {darkMode ? "☀ Light" : "🌙 Dark"}
+                    </button>
+
+                    <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2 rounded-lg">
+                        Get Started
+                    </button>
+                </div>
 
             </div>
-
         </nav>
     );
 }

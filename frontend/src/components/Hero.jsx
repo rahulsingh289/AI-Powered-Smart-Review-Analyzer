@@ -1,3 +1,5 @@
+import { Button } from "./ui";
+
 function Hero() {
     return (
         <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white">
@@ -23,41 +25,54 @@ function Hero() {
                     </h1>
 
                     <p className="mt-8 text-lg md:text-2xl text-gray-300 max-w-3xl mx-auto">
-                        Analyze customer sentiment, classify feedback, uncover trends,
-                        and generate AI-powered recommendations that help businesses
-                        make smarter decisions.
+                        Analyze customer sentiment,
+                        classify feedback, uncover trends,
+                        and generate AI-powered
+                        recommendations.
                     </p>
 
                     <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
 
-                        <button className="px-8 py-4 rounded-xl bg-white text-slate-900 font-semibold hover:scale-105 transition duration-300">
+                        <Button
+                            variant="primary"
+                            size="lg"
+                        >
                             Start Analyzing
-                        </button>
+                        </Button>
 
-                        <button className="px-8 py-4 rounded-xl border border-white/30 hover:bg-white/10 transition duration-300">
-                            Watch Demo
-                        </button>
+                        <Button
+                            variant="outline"
+                            size="lg"
+                        >
+                            Learn More
+                        </Button>
 
                     </div>
 
                     <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
 
                         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                            <h3 className="text-3xl font-bold">95%</h3>
+                            <h3 className="text-3xl font-bold">
+                                95%
+                            </h3>
                             <p className="text-gray-300 mt-2">
                                 Sentiment Accuracy
                             </p>
                         </div>
 
                         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                            <h3 className="text-3xl font-bold">1000+</h3>
+                            <h3 className="text-3xl font-bold">
+                                1000+
+                            </h3>
                             <p className="text-gray-300 mt-2">
                                 Reviews Processed
                             </p>
                         </div>
 
                         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-                            <h3 className="text-3xl font-bold">24/7</h3>
+                            <h3 className="text-3xl font-bold">
+                                24/7
+                            </h3>
                             <p className="text-gray-300 mt-2">
                                 AI Monitoring
                             </p>

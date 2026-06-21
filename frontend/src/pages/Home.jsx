@@ -3,10 +3,14 @@ import Hero from "../components/Hero";
 import Card from "../components/Card";
 import Footer from "../components/Footer";
 
-function Home() {
+function Home({ darkMode, setDarkMode }) {
     return (
         <>
-            <Navbar />
+            <Navbar
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+            />
+
             <Hero />
 
             <section className="max-w-7xl mx-auto px-6 py-20">
@@ -15,6 +19,7 @@ function Home() {
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
                     <Card
                         title="📊 Sentiment Analysis"
                         description="Detect positive, negative, and neutral customer emotions."
@@ -29,6 +34,7 @@ function Home() {
                         title="🧠 AI Insights"
                         description="Generate business recommendations from feedback."
                     />
+
                 </div>
             </section>
 
