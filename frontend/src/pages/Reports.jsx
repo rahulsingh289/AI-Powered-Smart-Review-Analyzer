@@ -263,7 +263,7 @@ function Reports({ darkMode }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh]">
         <Loader />
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">Analyzing reports...</p>
+        <p className={`text-sm font-medium mt-2 ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Analyzing reports...</p>
       </div>
     );
   }
@@ -281,17 +281,23 @@ function Reports({ darkMode }) {
       )}
 
       {/* Header Info with Date range selector */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className={`p-6 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
+        darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+      }`}>
         <div>
-          <h2 className="text-xl font-bold mb-1">Analytics Reports</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
+          <h2 className={`text-xl font-bold mb-1 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>Analytics Reports</h2>
+          <p className={`text-xs sm:text-sm font-medium ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>
             Configure parameters and download comprehensive review analysis logs.
           </p>
         </div>
 
         {/* Date Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Range:</span>
+          <span className={`text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Range:</span>
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
@@ -312,30 +318,42 @@ function Reports({ darkMode }) {
         <div className={`p-6 rounded-3xl border ${
           darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Net Sentiment Score (NSS)</span>
+          <span className={`text-xs font-bold uppercase tracking-wider ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Net Sentiment Score (NSS)</span>
           <h3 className={`text-3xl font-black mt-2 ${nssScore >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
             {nssScore >= 0 ? `+${nssScore}` : nssScore}
           </h3>
           <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mt-3">
             <div className={`h-full ${nssScore >= 0 ? "bg-emerald-500" : "bg-rose-500"}`} style={{ width: nssProgressWidth }}></div>
           </div>
-          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">Scale ranges from -100 to +100</p>
+          <p className={`text-[10px] font-medium mt-2 ${
+            darkMode ? "text-slate-400" : "text-slate-500"
+          }`}>Scale ranges from -100 to +100</p>
         </div>
 
         <div className={`p-6 rounded-3xl border ${
           darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Top positive Driver</span>
-          <h3 className="text-3xl font-black mt-2 text-blue-500">{topTopic}</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">Theme associated with positive logs</p>
+          <span className={`text-xs font-bold uppercase tracking-wider ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Top positive Driver</span>
+          <h3 className="text-3xl font-black mt-2 text-indigo-500">{topTopic}</h3>
+          <p className={`text-xs font-medium mt-3 ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Theme associated with positive logs</p>
         </div>
 
         <div className={`p-6 rounded-3xl border ${
           darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
         }`}>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Negative Drivers</span>
+          <span className={`text-xs font-bold uppercase tracking-wider ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Negative Drivers</span>
           <h3 className="text-3xl font-black mt-2 text-rose-500">{negativeDriver}</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">Theme associated with negative complaints</p>
+          <p className={`text-xs font-medium mt-3 ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Theme associated with negative complaints</p>
         </div>
       </div>
 
@@ -347,15 +365,15 @@ function Reports({ darkMode }) {
           darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
         }`}>
           <div>
-            <h3 className="font-bold text-lg mb-1">Executive Summary PDF</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Includes sentiment graphs, topic metrics, and AI recommendations overview.</p>
+            <h3 className={`font-bold text-lg mb-1 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>Executive Summary PDF</h3>
+            <p className={`text-xs font-medium ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Includes sentiment graphs, topic metrics, and AI recommendations overview.</p>
           </div>
           
           <div className="h-44 rounded-2xl bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center border border-dashed border-slate-200 dark:border-slate-800 p-4">
             <svg className="w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 2v-6m-9-3h9m0 0a2 2 0 012 2v3m-2-3v4m-3-4v3m-6 0a2 2 0 00-2 2v3m2-3v4" />
             </svg>
-            <span className="text-xs text-slate-500 font-semibold">Mock-up Preview (Sentiment Trend Chart)</span>
+            <span className={`text-xs font-semibold ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Mock-up Preview (Sentiment Trend Chart)</span>
           </div>
 
           <button
@@ -379,15 +397,15 @@ function Reports({ darkMode }) {
           darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
         }`}>
           <div>
-            <h3 className="font-bold text-lg mb-1">Raw Analytics Data CSV</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Contains raw review text, sentiment classification keys, dates, and response drafts.</p>
+            <h3 className={`font-bold text-lg mb-1 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>Raw Analytics Data CSV</h3>
+            <p className={`text-xs font-medium ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Contains raw review text, sentiment classification keys, dates, and response drafts.</p>
           </div>
           
           <div className="h-44 rounded-2xl bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center border border-dashed border-slate-200 dark:border-slate-800 p-4">
             <svg className="w-8 h-8 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
-            <span className="text-xs text-slate-500 font-semibold">Spreadsheet Export Preview (Table Grid)</span>
+            <span className={`text-xs font-semibold ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Spreadsheet Export Preview (Table Grid)</span>
           </div>
 
           <button
@@ -413,15 +431,17 @@ function Reports({ darkMode }) {
       <div className={`rounded-3xl border overflow-hidden ${
         darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
       }`}>
-        <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-          <h3 className="font-bold text-lg mb-1">Generated Report Log</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">History of report compiled during your subscription period</p>
+        <div className={`p-6 border-b ${darkMode ? "border-slate-800" : "border-slate-200"}`}>
+          <h3 className={`font-bold text-lg mb-1 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>Generated Report Log</h3>
+          <p className={`text-xs font-medium ${darkMode ? "text-slate-400" : "text-slate-600"}`}>History of report compiled during your subscription period</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-950/20">
+              <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
+                darkMode ? "border-slate-800 text-slate-400 bg-slate-900/50" : "border-slate-200 text-slate-600 bg-slate-50"
+              }`}>
                 <th className="px-6 py-4">Report ID</th>
                 <th className="px-6 py-4">Report Name</th>
                 <th className="px-6 py-4">Date Compiled</th>
@@ -430,27 +450,41 @@ function Reports({ darkMode }) {
                 <th className="px-6 py-4">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+            <tbody className={`divide-y text-sm ${
+              darkMode ? "divide-slate-800" : "divide-slate-200"
+            }`}>
               {reportHistory.map((report) => (
-                <tr key={report.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/30 transition-colors">
-                  <td className="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400">{report.id}</td>
-                  <td className="px-6 py-4 font-semibold text-slate-800 dark:text-slate-200">{report.name}</td>
-                  <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{report.date}</td>
+                <tr key={report.id} className={`transition-colors ${
+                  darkMode ? "hover:bg-slate-800/50" : "hover:bg-slate-50"
+                }`}>
+                  <td className={`px-6 py-4 font-mono text-xs ${
+                    darkMode ? "text-slate-400" : "text-slate-500"
+                  }`}>{report.id}</td>
+                  <td className={`px-6 py-4 font-semibold ${
+                    darkMode ? "text-slate-200" : "text-slate-800"
+                  }`}>{report.name}</td>
+                  <td className={`px-6 py-4 text-xs ${
+                    darkMode ? "text-slate-400" : "text-slate-500"
+                  }`}>{report.date}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
-                      report.format === "PDF" ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"
+                      report.format === "PDF" ? "bg-rose-500/10 text-rose-500" : "bg-emerald-500/10 text-emerald-500"
                     }`}>
                       {report.format}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{report.size}</td>
+                  <td className={`px-6 py-4 text-xs ${
+                    darkMode ? "text-slate-400" : "text-slate-500"
+                  }`}>{report.size}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => {
                         setSuccessToast(`Downloading historic report ${report.id}...`);
                         setTimeout(() => setSuccessToast(""), 2000);
                       }}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-500 cursor-pointer"
+                      className={`text-xs font-bold cursor-pointer ${
+                        darkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
+                      }`}
                     >
                       Download
                     </button>

@@ -1,10 +1,40 @@
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function DashboardLayout({ darkMode, setDarkMode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Load user profile data from localStorage
+  const [userName, setUserName] = useState("User");
+  const [userAvatar, setUserAvatar] = useState("");
+
+  useEffect(() => {
+    // Load initial data
+    loadUserProfile();
+
+    // Listen for storage changes (when Settings updates localStorage)
+    const handleStorageChange = () => {
+      loadUserProfile();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    // Also listen for custom event when updating in same tab
+    window.addEventListener("profileUpdated", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("profileUpdated", handleStorageChange);
+    };
+  }, []);
+
+  const loadUserProfile = () => {
+    const name = localStorage.getItem("settings_name") || "User";
+    const avatar = localStorage.getItem("settings_avatar") || "";
+    setUserName(name);
+    setUserAvatar(avatar);
+  };
 
   const menuItems = [
     {
@@ -63,11 +93,11 @@ function DashboardLayout({ darkMode, setDarkMode }) {
     <div className={`min-h-screen flex ${darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"}`}>
       {/* Sidebar - Desktop */}
       <aside className={`hidden md:flex flex-col w-64 border-r shrink-0 transition-colors duration-300 ${
-        darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+        darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
       }`}>
         {/* Brand Logo */}
         <div className="p-6 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold shadow-lg shadow-amber-500/30">
             AI
           </div>
           <div>
@@ -86,9 +116,11 @@ function DashboardLayout({ darkMode, setDarkMode }) {
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white"
+                    ? darkMode 
+                      ? "bg-slate-800 text-slate-100 shadow-sm" 
+                      : "bg-slate-100 text-slate-900 shadow-sm"
                     : darkMode
-                    ? "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                    ? "text-slate-400 hover:bg-slate-800/60 hover:text-slate-100"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
@@ -130,7 +162,7 @@ function DashboardLayout({ darkMode, setDarkMode }) {
           }`}>
             <div className="p-6 flex items-center justify-between border-b dark:border-slate-800 border-slate-200">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold shadow-lg">
                   AI
                 </div>
                 <h2 className="font-bold text-base leading-tight">Review Analyzer</h2>
@@ -216,10 +248,10 @@ function DashboardLayout({ darkMode, setDarkMode }) {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded-xl transition-all duration-200 border ${
+              className={`p-2.5 rounded-xl transition-all duration-200 border ${
                 darkMode
-                  ? "bg-slate-800 border-slate-700 hover:bg-slate-700 text-amber-400"
-                  : "bg-white border-slate-200 hover:bg-slate-50 text-indigo-600 shadow-sm"
+                  ? "bg-slate-800 border-slate-700 hover:bg-slate-700 text-amber-400 hover:text-amber-300"
+                  : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-indigo-600 hover:text-indigo-700 shadow-sm"
               }`}
               aria-label="Toggle theme"
             >
@@ -236,11 +268,15 @@ function DashboardLayout({ darkMode, setDarkMode }) {
 
             {/* Profile */}
             <div className="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-slate-800">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                U
+              <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-tr from-amber-500 to-amber-600 text-white font-semibold text-sm shadow-md">
+                {userAvatar ? (
+                  <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  userName.charAt(0).toUpperCase()
+                )}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-semibold leading-tight">User</p>
+                <p className="text-sm font-semibold leading-tight">{userName}</p>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">Administrator</span>
               </div>
             </div>

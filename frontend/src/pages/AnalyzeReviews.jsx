@@ -48,9 +48,13 @@ function AnalyzeReviews({ darkMode }) {
   return (
     <div className="space-y-6">
       {/* Top Header info */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <h2 className="text-xl font-extrabold mb-1">AI Review Analyzer</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
+      <div className={`p-6 rounded-3xl border shadow-sm ${
+        darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+      }`}>
+        <h2 className={`text-xl font-extrabold mb-1 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>AI Review Analyzer</h2>
+        <p className={`text-xs sm:text-sm font-medium ${
+          darkMode ? "text-slate-400" : "text-slate-600"
+        }`}>
           Paste guest reviews below and let AI analyze sentiment and themes in seconds.
         </p>
       </div>
@@ -60,7 +64,9 @@ function AnalyzeReviews({ darkMode }) {
         darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
       }`}>
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Paste Reviews</label>
+          <label className={`block text-xs font-bold uppercase tracking-wider ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Paste Reviews</label>
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -99,7 +105,9 @@ function AnalyzeReviews({ darkMode }) {
       {isAnalyzing && (
         <div className="py-12">
           <Loader />
-          <p className="text-center text-xs text-slate-500 dark:text-slate-400 font-medium animate-pulse">Processing reviews with AI NLP models...</p>
+          <p className={`text-center text-xs font-medium animate-pulse ${
+            darkMode ? "text-slate-400" : "text-slate-600"
+          }`}>Processing reviews with AI NLP models...</p>
         </div>
       )}
 
@@ -108,44 +116,60 @@ function AnalyzeReviews({ darkMode }) {
         <div className={`rounded-3xl border overflow-hidden ${
           darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
         }`}>
-          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-            <h3 className="font-bold text-lg mb-1">Analyze Results</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Extracted sentiments, themes, and responses</p>
+          <div className={`p-6 border-b ${darkMode ? "border-slate-800" : "border-slate-200"}`}>
+            <h3 className={`font-bold text-lg mb-1 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>Analyze Results</h3>
+            <p className={`text-xs font-medium ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Extracted sentiments, themes, and responses</p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-950/20">
+                <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
+                  darkMode ? "border-slate-800 text-slate-400 bg-slate-900/50" : "border-slate-200 text-slate-600 bg-slate-50"
+                }`}>
                   <th className="px-6 py-4">Reviews</th>
                   <th className="px-6 py-4">Sentiments</th>
                   <th className="px-6 py-4">Theme</th>
                   <th className="px-6 py-4">Suggested Response</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+              <tbody className={`divide-y text-sm ${
+                darkMode ? "divide-slate-800" : "divide-slate-200"
+              }`}>
                 {results.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/30 transition-colors">
-                    <td className="px-6 py-4 font-medium max-w-sm truncate text-slate-800 dark:text-slate-100">{item.text}</td>
+                  <tr key={item.id} className={`transition-colors ${
+                    darkMode ? "hover:bg-slate-800/50" : "hover:bg-slate-50"
+                  }`}>
+                    <td className={`px-6 py-4 font-medium max-w-sm truncate ${
+                      darkMode ? "text-slate-200" : "text-slate-800"
+                    }`}>{item.text}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                         item.sentiment === "Positive"
-                          ? "bg-emerald-500/10 text-emerald-500"
+                          ? darkMode
+                            ? "bg-emerald-500/15 text-emerald-400"
+                            : "bg-emerald-100 text-emerald-700"
                           : item.sentiment === "Neutral"
-                          ? "bg-blue-500/10 text-blue-500"
-                          : "bg-rose-500/10 text-rose-500"
+                          ? darkMode
+                            ? "bg-indigo-500/15 text-indigo-400"
+                            : "bg-indigo-100 text-indigo-700"
+                          : darkMode
+                            ? "bg-rose-500/15 text-rose-400"
+                            : "bg-rose-100 text-rose-700"
                       }`}>
                         {item.sentiment}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        darkMode ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600"
+                        darkMode ? "bg-slate-800 text-slate-300" : "bg-slate-200 text-slate-700"
                       }`}>
                         {item.theme}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400 italic">
+                    <td className={`px-6 py-4 italic ${
+                      darkMode ? "text-slate-400" : "text-slate-600"
+                    }`}>
                       "{item.suggestedResponse}"
                     </td>
                   </tr>

@@ -12,7 +12,7 @@ function Hero({ darkMode }) {
       <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-32 flex flex-col items-center">
         {/* Badge */}
         <span className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider mb-8 border ${
-          darkMode ? "bg-slate-900 border-slate-800 text-blue-400" : "bg-blue-50 border-blue-100 text-blue-600"
+          darkMode ? "bg-slate-900 border-slate-800 text-amber-400" : "bg-amber-50 border-amber-100 text-amber-600"
         }`}>
           <span>🚀</span> AI-Powered Customer Intelligence
         </span>
@@ -20,7 +20,7 @@ function Hero({ darkMode }) {
         {/* Hero Title */}
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-center tracking-tight leading-[1.1] max-w-4xl">
           Transform Customer{" "}
-          <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-indigo-300 dark:to-violet-400">
+          <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent dark:from-amber-400 dark:via-amber-300 dark:to-orange-400">
             Reviews Into Insights
           </span>
         </h1>
@@ -36,7 +36,7 @@ function Hero({ darkMode }) {
         <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
           <button
             onClick={() => navigate("/login")}
-            className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all text-center cursor-pointer"
+            className="px-8 py-4 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-base shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all text-center cursor-pointer"
           >
             Start Analyzing
           </button>
@@ -65,7 +65,7 @@ function Hero({ darkMode }) {
                   : "bg-white/80 border-slate-200/50 hover:shadow-lg hover:shadow-slate-100/50"
               }`}
             >
-              <h3 className="text-3xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-300">
+              <h3 className="text-3xl font-black bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent dark:from-amber-400 dark:to-amber-300">
                 {stat.value}
               </h3>
               <p className={`text-sm font-semibold mt-2 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>

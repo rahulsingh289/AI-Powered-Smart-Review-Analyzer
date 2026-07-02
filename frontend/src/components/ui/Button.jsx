@@ -18,7 +18,7 @@ function Button({
 }) {
     const variants = {
         primary:
-            "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-500/5 active:scale-[0.98]",
+            "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg shadow-amber-500/20 dark:shadow-amber-500/5 active:scale-[0.98]",
 
         secondary:
             "bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:text-slate-200 active:scale-[0.98]",
