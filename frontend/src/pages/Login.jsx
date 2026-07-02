@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import NavBar from "../components/NavBar";
 
 function Login({ darkMode, setDarkMode }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -24,15 +25,16 @@ function Login({ darkMode, setDarkMode }) {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-6 transition-colors duration-300 ${
+    <div className={`min-h-screen transition-colors duration-300 ${
       darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
     }`}>
+      <NavBar darkMode={darkMode} setDarkMode={setDarkMode} />
 
-
-      <div className="relative w-full max-w-md">
+      <div className="flex items-center justify-center p-6 py-24">
+        <div className="relative w-full max-w-md">
         {/* Logo/Brand */}
         <div className="flex flex-col items-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xl shadow-xl shadow-blue-600/30 mb-3 hover:scale-110 transition-transform duration-300">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-white font-extrabold text-xl shadow-xl shadow-amber-600/30 mb-3 hover:scale-110 transition-transform duration-300">
             AI
           </div>
           <h1 className="text-2xl font-black tracking-tight text-center">Smart Review Analyzer</h1>
@@ -66,8 +68,8 @@ function Login({ darkMode, setDarkMode }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                    darkMode ? "border-slate-800 focus:border-blue-500 text-white" : "border-slate-200 focus:border-blue-500 text-slate-900"
+                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+                    darkMode ? "border-slate-800 focus:border-amber-500 text-white" : "border-slate-200 focus:border-amber-500 text-slate-900"
                   }`}
                 />
               </div>
@@ -82,8 +84,8 @@ function Login({ darkMode, setDarkMode }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                    darkMode ? "border-slate-800 focus:border-blue-500 text-white" : "border-slate-200 focus:border-blue-500 text-slate-900"
+                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+                    darkMode ? "border-slate-800 focus:border-amber-500 text-white" : "border-slate-200 focus:border-amber-500 text-slate-900"
                   }`}
                 />
               </div>
@@ -94,18 +96,18 @@ function Login({ darkMode, setDarkMode }) {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+                    className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800"
                   />
                   <span className="text-slate-600 dark:text-slate-400 font-medium">Remember me</span>
                 </label>
-                <a href="#" className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-semibold">
+                <a href="#" className="text-amber-600 hover:text-amber-500 dark:text-amber-400 dark:hover:text-amber-300 font-semibold">
                   Forgot Password?
                 </a>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-2xl transition duration-200 shadow-lg shadow-blue-600/20 active:scale-[0.98] mt-2 text-sm cursor-pointer"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-2xl transition duration-200 shadow-lg shadow-amber-600/20 active:scale-[0.98] mt-2 text-sm cursor-pointer"
               >
                 Login
               </button>
@@ -123,8 +125,8 @@ function Login({ darkMode, setDarkMode }) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
-                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                    darkMode ? "border-slate-800 focus:border-blue-500 text-white" : "border-slate-200 focus:border-blue-500 text-slate-900"
+                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+                    darkMode ? "border-slate-800 focus:border-amber-500 text-white" : "border-slate-200 focus:border-amber-500 text-slate-900"
                   }`}
                 />
               </div>
@@ -139,8 +141,8 @@ function Login({ darkMode, setDarkMode }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                    darkMode ? "border-slate-800 focus:border-blue-500 text-white" : "border-slate-200 focus:border-blue-500 text-slate-900"
+                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+                    darkMode ? "border-slate-800 focus:border-amber-500 text-white" : "border-slate-200 focus:border-amber-500 text-slate-900"
                   }`}
                 />
               </div>
@@ -155,8 +157,8 @@ function Login({ darkMode, setDarkMode }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                    darkMode ? "border-slate-800 focus:border-blue-500 text-white" : "border-slate-200 focus:border-blue-500 text-slate-900"
+                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+                    darkMode ? "border-slate-800 focus:border-amber-500 text-white" : "border-slate-200 focus:border-amber-500 text-slate-900"
                   }`}
                 />
               </div>
@@ -171,8 +173,8 @@ function Login({ darkMode, setDarkMode }) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                    darkMode ? "border-slate-800 focus:border-blue-500 text-white" : "border-slate-200 focus:border-blue-500 text-slate-900"
+                  className={`w-full px-4 py-3 rounded-2xl border transition-all duration-200 bg-slate-50/50 dark:bg-slate-950/50 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+                    darkMode ? "border-slate-800 focus:border-amber-500 text-white" : "border-slate-200 focus:border-amber-500 text-slate-900"
                   }`}
                 />
               </div>
@@ -184,7 +186,7 @@ function Login({ darkMode, setDarkMode }) {
                     required
                     checked={agreeTerms}
                     onChange={(e) => setAgreeTerms(e.target.checked)}
-                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 mt-0.5"
+                    className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 mt-0.5"
                   />
                   <span className="text-slate-600 dark:text-slate-400 font-medium">
                     I agree to the Terms of Service & Privacy Policy
@@ -194,7 +196,7 @@ function Login({ darkMode, setDarkMode }) {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-2xl transition duration-200 shadow-lg shadow-blue-600/20 active:scale-[0.98] mt-2 text-sm cursor-pointer"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-2xl transition duration-200 shadow-lg shadow-amber-600/20 active:scale-[0.98] mt-2 text-sm cursor-pointer"
               >
                 Sign Up
               </button>
@@ -227,6 +229,7 @@ function Login({ darkMode, setDarkMode }) {
           <a href="#" className="underline font-semibold hover:text-slate-700 dark:hover:text-slate-300">Terms of Service</a> and{" "}
           <a href="#" className="underline font-semibold hover:text-slate-700 dark:hover:text-slate-300">Privacy Policy</a>.
         </p>
+        </div>
       </div>
     </div>
   );

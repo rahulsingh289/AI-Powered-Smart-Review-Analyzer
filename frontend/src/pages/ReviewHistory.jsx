@@ -130,7 +130,7 @@ function ReviewHistory({ darkMode }) {
     <div className="space-y-6">
       {/* Header controls & Filters (UX Improvements) */}
       <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
-        <h2 className="text-xl font-bold">Review History</h2>
+        <h2 className={`text-xl font-bold ${darkMode ? "text-slate-100" : "text-slate-900"}`}>Review History</h2>
         
         {/* Controls block */}
         <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
@@ -162,7 +162,7 @@ function ReviewHistory({ darkMode }) {
             value={filterSentiment}
             onChange={(e) => setFilterSentiment(e.target.value)}
             className={`px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-              darkMode ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-600 shadow-sm"
+              darkMode ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-sm"
             }`}
           >
             <option value="All">All Sentiments</option>
@@ -176,7 +176,7 @@ function ReviewHistory({ darkMode }) {
             value={filterTheme}
             onChange={(e) => setFilterTheme(e.target.value)}
             className={`px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-              darkMode ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-600 shadow-sm"
+              darkMode ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700 shadow-sm"
             }`}
           >
             <option value="All">All Themes</option>
@@ -198,13 +198,15 @@ function ReviewHistory({ darkMode }) {
           {loading ? (
             <div className="py-20 text-center">
               <Loader />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Loading reviews...</p>
+              <p className={`text-xs font-medium mt-2 ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Loading reviews...</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-950/20">
+                  <tr className={`border-b text-xs font-bold uppercase tracking-wider ${
+                    darkMode ? "border-slate-800 text-slate-400 bg-slate-900/50" : "border-slate-200 text-slate-600 bg-slate-50"
+                  }`}>
                     <th className="px-6 py-4">Review</th>
                     <th className="px-6 py-4">Sentiment</th>
                     <th className="px-6 py-4">Theme</th>
@@ -212,7 +214,9 @@ function ReviewHistory({ darkMode }) {
                     <th className="px-6 py-4">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                <tbody className={`divide-y text-sm ${
+                  darkMode ? "divide-slate-800" : "divide-slate-200"
+                }`}>
                   {paginatedReviews.length > 0 ? (
                     paginatedReviews.map((review) => (
                       <tr
@@ -222,39 +226,53 @@ function ReviewHistory({ darkMode }) {
                           selectedReview?.id === review.id
                             ? darkMode
                               ? "bg-blue-600/10 text-blue-400"
-                              : "bg-blue-50/80 text-blue-700"
-                            : "hover:bg-slate-50/50 dark:hover:bg-slate-950/30"
+                              : "bg-blue-50 text-blue-700"
+                            : darkMode
+                            ? "hover:bg-slate-800/50"
+                            : "hover:bg-slate-50"
                         }`}
                       >
-                        <td className="px-6 py-4 max-w-[200px] truncate font-medium text-slate-800 dark:text-slate-100">
+                        <td className={`px-6 py-4 max-w-[200px] truncate font-medium ${
+                          darkMode ? "text-slate-200" : "text-slate-800"
+                        }`}>
                           {review.text}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                             review.sentiment === "Positive"
-                              ? "bg-emerald-500/10 text-emerald-500"
+                              ? darkMode
+                                ? "bg-emerald-500/15 text-emerald-400"
+                                : "bg-emerald-100 text-emerald-700"
                               : review.sentiment === "Neutral"
-                              ? "bg-blue-500/10 text-blue-500"
-                              : "bg-rose-500/10 text-rose-500"
+                              ? darkMode
+                                ? "bg-indigo-500/15 text-indigo-400"
+                                : "bg-indigo-100 text-indigo-700"
+                              : darkMode
+                                ? "bg-rose-500/15 text-rose-400"
+                                : "bg-rose-100 text-rose-700"
                           }`}>
                             {review.sentiment}
                           </span>
                         </td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            darkMode ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600"
+                            darkMode ? "bg-slate-800 text-slate-300" : "bg-slate-200 text-slate-700"
                           }`}>
                             {review.theme}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs whitespace-nowrap">{review.date}</td>
+                        <td className={`px-6 py-4 text-xs whitespace-nowrap font-medium ${
+                          darkMode ? "text-slate-400" : "text-slate-500"
+                        }`}>{review.date}</td>
                         <td className="px-6 py-4 flex gap-3">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedReview(review);
                             }}
-                            className="text-xs font-bold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                            className={`text-xs font-bold cursor-pointer ${
+                              darkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
+                            }`}
                           >
                             View
                           </button>
@@ -263,7 +281,9 @@ function ReviewHistory({ darkMode }) {
                               e.stopPropagation();
                               handleDelete(review.id);
                             }}
-                            className="text-xs font-bold text-rose-600 hover:text-rose-500 cursor-pointer"
+                            className={`text-xs font-bold cursor-pointer ${
+                              darkMode ? "text-rose-400 hover:text-rose-300" : "text-rose-600 hover:text-rose-700"
+                            }`}
                           >
                             Delete
                           </button>
@@ -272,7 +292,9 @@ function ReviewHistory({ darkMode }) {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+                      <td colSpan="5" className={`px-6 py-8 text-center text-sm font-medium ${
+                        darkMode ? "text-slate-400" : "text-slate-500"
+                      }`}>
                         No reviews found matching the filters.
                       </td>
                     </tr>
@@ -283,12 +305,14 @@ function ReviewHistory({ darkMode }) {
           )}
 
           {/* Pagination Footer */}
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex justify-center items-center gap-1">
+          <div className="p-4 border-t flex justify-center items-center gap-1 ${
+            darkMode ? 'border-slate-800' : 'border-slate-200'
+          }">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer ${
-                darkMode ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-500"
+                darkMode ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-600"
               }`}
             >
               &lt;
@@ -303,7 +327,7 @@ function ReviewHistory({ darkMode }) {
                     ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
                     : darkMode
                     ? "hover:bg-slate-800 text-slate-400"
-                    : "hover:bg-slate-100 text-slate-600"
+                    : "hover:bg-slate-100 text-slate-700"
                 }`}
               >
                 {pageNum}
@@ -314,7 +338,7 @@ function ReviewHistory({ darkMode }) {
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
               className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer ${
-                darkMode ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-500"
+                darkMode ? "hover:bg-slate-800 text-slate-400" : "hover:bg-slate-100 text-slate-600"
               }`}
             >
               &gt;
@@ -327,17 +351,19 @@ function ReviewHistory({ darkMode }) {
           darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"
         }`}>
           <div>
-            <h3 className="font-bold text-lg mb-1">Review Details</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Deep-dive and suggested action</p>
+            <h3 className={`font-bold text-lg mb-1 ${darkMode ? "text-slate-100" : "text-slate-900"}`}>Review Details</h3>
+            <p className={`text-xs font-medium ${darkMode ? "text-slate-400" : "text-slate-600"}`}>Deep-dive and suggested action</p>
           </div>
 
           {selectedReview ? (
             <div className="space-y-4">
               {/* Review Text */}
               <div className="space-y-1.5">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Review</span>
+                <span className={`text-xs font-bold uppercase tracking-wider ${
+                  darkMode ? "text-slate-400" : "text-slate-600"
+                }`}>Review</span>
                 <p className={`p-4 rounded-2xl text-sm leading-relaxed border ${
-                  darkMode ? "bg-slate-950/40 border-slate-800" : "bg-slate-50 border-slate-200"
+                  darkMode ? "bg-slate-950/40 border-slate-800 text-slate-200" : "bg-slate-50 border-slate-200 text-slate-800"
                 }`}>
                   {selectedReview.text}
                 </p>
@@ -345,14 +371,22 @@ function ReviewHistory({ darkMode }) {
 
               {/* Sentiment badge */}
               <div className="space-y-1.5">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sentiment</span>
+                <span className={`text-xs font-bold uppercase tracking-wider ${
+                  darkMode ? "text-slate-400" : "text-slate-600"
+                }`}>Sentiment</span>
                 <div>
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
                     selectedReview.sentiment === "Positive"
-                      ? "bg-emerald-500/10 text-emerald-500"
+                      ? darkMode
+                        ? "bg-emerald-500/15 text-emerald-400"
+                        : "bg-emerald-100 text-emerald-700"
                       : selectedReview.sentiment === "Neutral"
-                      ? "bg-blue-500/10 text-blue-500"
-                      : "bg-rose-500/10 text-rose-500"
+                      ? darkMode
+                        ? "bg-indigo-500/15 text-indigo-400"
+                        : "bg-indigo-100 text-indigo-700"
+                      : darkMode
+                        ? "bg-rose-500/15 text-rose-400"
+                        : "bg-rose-100 text-rose-700"
                   }`}>
                     {selectedReview.sentiment}
                   </span>
@@ -361,10 +395,12 @@ function ReviewHistory({ darkMode }) {
 
               {/* Theme badge */}
               <div className="space-y-1.5">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Theme</span>
+                <span className={`text-xs font-bold uppercase tracking-wider ${
+                  darkMode ? "text-slate-400" : "text-slate-600"
+                }`}>Theme</span>
                 <div>
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                    darkMode ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600"
+                    darkMode ? "bg-slate-800 text-slate-300" : "bg-slate-200 text-slate-700"
                   }`}>
                     {selectedReview.theme}
                   </span>
@@ -374,11 +410,15 @@ function ReviewHistory({ darkMode }) {
               {/* Suggested response (Editable) */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Suggested Response</span>
+                  <span className={`text-xs font-bold uppercase tracking-wider ${
+                    darkMode ? "text-slate-400" : "text-slate-600"
+                  }`}>Suggested Response</span>
                   {!isEditingResponse ? (
                     <button
                       onClick={() => setIsEditingResponse(true)}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-500 cursor-pointer"
+                      className={`text-xs font-bold cursor-pointer ${
+                        darkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"
+                      }`}
                     >
                       Edit
                     </button>
@@ -386,7 +426,9 @@ function ReviewHistory({ darkMode }) {
                     <div className="flex gap-2">
                       <button
                         onClick={handleSaveResponse}
-                        className="text-xs font-bold text-emerald-600 hover:text-emerald-500 cursor-pointer"
+                        className={`text-xs font-bold cursor-pointer ${
+                          darkMode ? "text-emerald-400 hover:text-emerald-300" : "text-emerald-600 hover:text-emerald-700"
+                        }`}
                       >
                         Save
                       </button>
@@ -395,7 +437,9 @@ function ReviewHistory({ darkMode }) {
                           setIsEditingResponse(false);
                           setEditedResponseText(selectedReview.suggestedResponse);
                         }}
-                        className="text-xs font-bold text-slate-500 hover:text-slate-400 cursor-pointer"
+                        className={`text-xs font-bold cursor-pointer ${
+                          darkMode ? "text-slate-400 hover:text-slate-300" : "text-slate-600 hover:text-slate-700"
+                        }`}
                       >
                         Cancel
                       </button>
@@ -416,7 +460,7 @@ function ReviewHistory({ darkMode }) {
                   />
                 ) : (
                   <p className={`p-4 rounded-2xl text-sm leading-relaxed border border-dashed ${
-                    darkMode ? "bg-slate-950/20 border-slate-800 text-slate-300" : "bg-blue-50/20 border-blue-200 text-slate-700"
+                    darkMode ? "bg-slate-950/20 border-slate-800 text-slate-300" : "bg-blue-50/40 border-blue-200 text-slate-700"
                   }`}>
                     {selectedReview.suggestedResponse}
                   </p>
@@ -432,7 +476,9 @@ function ReviewHistory({ darkMode }) {
               </button>
             </div>
           ) : (
-            <div className="py-12 text-center text-slate-500 dark:text-slate-400 text-sm">
+            <div className={`py-12 text-center text-sm font-medium ${
+              darkMode ? "text-slate-400" : "text-slate-500"
+            }`}>
               Select a review from the list to view detailed metrics and auto-responses.
             </div>
           )}

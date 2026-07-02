@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 function Navbar({ darkMode, setDarkMode }) {
   return (
     <nav className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-300 ${
-      darkMode ? "bg-slate-950/80 border-slate-800/80 text-white" : "bg-white/80 border-slate-200/80 text-slate-900"
+      darkMode ? "bg-slate-900/95 border-slate-800 text-slate-100" : "bg-white/95 border-slate-200 text-slate-900"
     }`}>
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-extrabold shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-white font-extrabold shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform duration-200">
             AI
           </div>
           <div>
@@ -19,20 +19,20 @@ function Navbar({ darkMode, setDarkMode }) {
 
         {/* Menu Links */}
         <div className="hidden md:flex items-center gap-8 font-semibold text-sm">
-          <Link to="/" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</Link>
-          <Link to="/about" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">About</Link>
-          <Link to="/dashboard" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Dashboard</Link>
-          <Link to="/login" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Login</Link>
+          <Link to="/" className={`transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Home</Link>
+          <Link to="/about" className={`transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>About</Link>
+          <Link to="/dashboard" className={`transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Dashboard</Link>
+          <Link to="/login" className={`transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Login</Link>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`p-2 rounded-xl transition-all duration-200 border cursor-pointer ${
+            className={`p-2.5 rounded-xl transition-all duration-200 border cursor-pointer ${
               darkMode
-                ? "bg-slate-900 border-slate-800 hover:bg-slate-800 text-amber-400"
-                : "bg-white border-slate-200 hover:bg-slate-50 text-indigo-600 shadow-sm"
+                ? "bg-slate-800 border-slate-700 hover:bg-slate-700 text-amber-400 hover:text-amber-300"
+                : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-indigo-600 hover:text-indigo-700 shadow-sm"
             }`}
             aria-label="Toggle theme"
           >
@@ -49,7 +49,7 @@ function Navbar({ darkMode, setDarkMode }) {
 
           <Link
             to="/login"
-            className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/20 active:scale-[0.98] transition-all"
+            className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-md shadow-amber-500/20 active:scale-[0.98] transition-all"
           >
             Get Started
           </Link>

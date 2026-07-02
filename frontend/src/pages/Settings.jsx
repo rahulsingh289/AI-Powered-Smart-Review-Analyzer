@@ -57,6 +57,8 @@ function Settings({ darkMode }) {
   const handleSaveProfile = (e) => {
     e.preventDefault();
     setToastMessage("Profile changes saved successfully!");
+    // Dispatch custom event to notify DashboardLayout
+    window.dispatchEvent(new Event("profileUpdated"));
     setTimeout(() => {
       setToastMessage("");
     }, 3000);
@@ -74,6 +76,8 @@ function Settings({ darkMode }) {
         setAvatar(reader.result);
         localStorage.setItem("settings_avatar", reader.result);
         setToastMessage("Avatar uploaded successfully!");
+        // Dispatch custom event to notify DashboardLayout
+        window.dispatchEvent(new Event("profileUpdated"));
         setTimeout(() => setToastMessage(""), 3000);
       };
       reader.readAsDataURL(file);
@@ -157,7 +161,7 @@ function Settings({ darkMode }) {
           <form onSubmit={handleSaveProfile} className="space-y-4">
             {/* Avatar section */}
             <div className="flex items-center gap-4 py-2">
-              <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-2xl shadow-md border-2 border-blue-500/20">
+              <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-tr from-amber-500 to-amber-600 text-white font-black text-2xl shadow-md border-2 border-amber-500/20">
                 {avatar ? (
                   <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -185,7 +189,7 @@ function Settings({ darkMode }) {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                   darkMode
                     ? "bg-slate-950 border-slate-800 text-slate-100 placeholder-slate-400"
                     : "bg-slate-50 border-slate-200 text-slate-800 shadow-inner"
@@ -200,7 +204,7 @@ function Settings({ darkMode }) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                   darkMode
                     ? "bg-slate-950 border-slate-800 text-slate-100"
                     : "bg-slate-50 border-slate-200 text-slate-800 shadow-inner"
@@ -214,7 +218,7 @@ function Settings({ darkMode }) {
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                   darkMode
                     ? "bg-slate-950 border-slate-800 text-slate-100"
                     : "bg-slate-50 border-slate-200 text-slate-800 shadow-inner"
@@ -224,7 +228,7 @@ function Settings({ darkMode }) {
 
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/15 transition cursor-pointer"
+              className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-500/15 transition cursor-pointer"
             >
               Save Profile Changes
             </button>
@@ -251,7 +255,7 @@ function Settings({ darkMode }) {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="••••••••"
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                   darkMode
                     ? "bg-slate-950 border-slate-800 text-slate-100"
                     : "bg-slate-50 border-slate-200 text-slate-800 shadow-inner"
@@ -267,7 +271,7 @@ function Settings({ darkMode }) {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                   darkMode
                     ? "bg-slate-950 border-slate-800 text-slate-100"
                     : "bg-slate-50 border-slate-200 text-slate-800 shadow-inner"
@@ -283,7 +287,7 @@ function Settings({ darkMode }) {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                   darkMode
                     ? "bg-slate-950 border-slate-800 text-slate-100"
                     : "bg-slate-50 border-slate-200 text-slate-800 shadow-inner"
@@ -293,7 +297,7 @@ function Settings({ darkMode }) {
 
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/15 transition cursor-pointer"
+              className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-500/15 transition cursor-pointer"
             >
               Update Password
             </button>
@@ -321,7 +325,7 @@ function Settings({ darkMode }) {
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer ${
                   darkMode ? "bg-slate-950 border-slate-800 text-slate-100" : "bg-slate-50 border-slate-200 text-slate-700 shadow-sm"
                 }`}
               >
@@ -337,7 +341,7 @@ function Settings({ darkMode }) {
               <select
                 value={aiTone}
                 onChange={(e) => setAiTone(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer ${
                   darkMode ? "bg-slate-950 border-slate-800 text-slate-100" : "bg-slate-50 border-slate-200 text-slate-700 shadow-sm"
                 }`}
               >
@@ -374,7 +378,7 @@ function Settings({ darkMode }) {
                 type="button"
                 onClick={() => setNotifications(!notifications)}
                 className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 focus:outline-none cursor-pointer ${
-                  notifications ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-700"
+                  notifications ? "bg-amber-600" : "bg-slate-300 dark:bg-slate-700"
                 }`}
               >
                 <div
@@ -394,7 +398,7 @@ function Settings({ darkMode }) {
                 type="button"
                 onClick={() => setMarketingEmails(!marketingEmails)}
                 className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 focus:outline-none cursor-pointer ${
-                  marketingEmails ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-700"
+                  marketingEmails ? "bg-amber-600" : "bg-slate-300 dark:bg-slate-700"
                 }`}
               >
                 <div
