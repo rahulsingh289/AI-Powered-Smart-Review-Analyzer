@@ -1,13 +1,11 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { PrismaClient } from "@prisma/client";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const prisma = new PrismaClient();
 
 // Enable CORS for frontend Vite dev server origin
 app.use(cors({
@@ -17,62 +15,54 @@ app.use(cors({
 
 app.use(express.json());
 
-// Seed database if empty on startup
-const seedIfEmpty = async () => {
-  try {
-    const count = await prisma.review.count();
-    if (count === 0) {
-      const initialReviews = [
-        {
-          text: "The food was amazing and host was very friendly and helpful",
-          sentiment: "Positive",
-          theme: "Food/Host",
-          date: "2 May 2026",
-          suggestedResponse: "Thank you so much! Our hospitality staff is always thrilled to serve our guests."
-        },
-        {
-          text: "Room was clean and location is near to the beach",
-          sentiment: "Positive",
-          theme: "Cleanliness",
-          date: "13 May 2026",
-          suggestedResponse: "Thank you! We take pride in keeping our rooms clean and comfortable for our guests."
-        },
-        {
-          text: "The WiFi was slow and the TV did not work",
-          sentiment: "Negative",
-          theme: "Facilities",
-          date: "28 May 2026",
-          suggestedResponse: "We are sorry for the inconvenience caused. We will check the facility issues and correct them immediately."
-        },
-        {
-          text: "Bathroom was not clean and smelled bad.",
-          sentiment: "Negative",
-          theme: "Cleanliness",
-          date: "9 May 2026",
-          suggestedResponse: "We apologize for the cleanliness issues. We have flagged this with our housekeeping team to resolve immediately."
-        },
-        {
-          text: "Good value for money. I will come back again",
-          sentiment: "Positive",
-          theme: "Value",
-          date: "30 Apr 2026",
-          suggestedResponse: "Great value is what we strive to offer! We are happy your stay was worth it."
-        }
-      ];
-      await prisma.review.createMany({
-        data: initialReviews
-      });
-      console.log("Seeded database with initial reviews since it was empty.");
-    }
-  } catch (error) {
-    console.error("Error seeding empty database:", error);
+// In-memory data store for Reviews (CRUD operations)
+let reviews = [
+  {
+    id: 1,
+    text: "The food was amazing and host was very friendly and helpful",
+    sentiment: "Positive",
+    theme: "Food/Host",
+    date: "2 May 2026",
+    suggestedResponse: "Thank you so much for your kind words! We are happy you enjoyed your stay"
+  },
+  {
+    id: 2,
+    text: "Room was clean and location is near to the beach",
+    sentiment: "Positive",
+    theme: "Cleanliness",
+    date: "13 May 2026",
+    suggestedResponse: "We're glad you enjoyed our location and cleanliness. We look forward to hosting you again!"
+  },
+  {
+    id: 3,
+    text: "The WiFi was slow and the TV did not work",
+    sentiment: "Negative",
+    theme: "Facilities",
+    date: "28 May 2026",
+    suggestedResponse: "We are sorry for the convenience. We will check the WiFi speed and the TV issues immediately."
+  },
+  {
+    id: 4,
+    text: "Bathroom was not clean and smelled bad.",
+    sentiment: "Negative",
+    theme: "Location",
+    date: "9 May 2026",
+    suggestedResponse: "We apologize for the cleanliness. We have flagged this with our housekeeping team to improve."
+  },
+  {
+    id: 5,
+    text: "Good value for money. I will come back again",
+    sentiment: "Positive",
+    theme: "Value",
+    date: "30 Apr 2026",
+    suggestedResponse: "Great value is what we strive for! Thank you for staying with us, and see you next time!"
   }
-};
-seedIfEmpty();
+];
 
 // Mock translation engine
 const translateText = (text, targetLang) => {
   if (targetLang === "Spanish") {
+    // Basic translations for common structures
     let translated = text;
     if (text.includes("We apologize for the cleanliness issues")) {
       translated = "Nos disculpamos por los problemas de limpieza. Lo hemos reportado al equipo de mantenimiento.";
@@ -161,7 +151,7 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
   let hasPositive = positiveWords.some(w => lower.includes(w));
   const hasNeutral = neutralWords.some(w => lower.includes(w));
 
-  // Negation check
+  // Negation check (e.g. "not clean", "no wifi", "not friendly")
   const negatedPositivePhrases = [
     "not clean", "not friendly", "not helpful", "not good", "not great", 
     "not nice", "not comfortable", "no wifi", "no tv", "not enjoy", 
@@ -186,6 +176,7 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
   } else if (hasPositive) {
     sentiment = "Positive";
   } else {
+    // If no sentiment indicator keywords are matched, default to Neutral
     sentiment = "Neutral";
   }
 
@@ -204,7 +195,7 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
     theme = "Food/Host";
   }
 
-  // Theme responses map
+  // Theme responses map based on Sentiment and AI Tone settings
   const responses = {
     "Cleanliness": {
       "Negative": {
@@ -312,8 +303,10 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
   const sentimentNode = themeNode[sentiment] || themeNode["Positive"];
   response = sentimentNode[tone] || sentimentNode["Professional"];
 
+  // Apply language Translation filter
   response = translateText(response, language);
 
+  // Format today's date for reviews
   const options = { day: 'numeric', month: 'short', year: 'numeric' };
   const dateStr = new Date().toLocaleDateString('en-GB', options);
 
@@ -328,249 +321,187 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
 };
 
 // 1. GET /api/reviews — List all reviews (with optional search, sentiment, and theme filters)
-app.get("/api/reviews", async (req, res, next) => {
-  try {
-    const { q, sentiment, theme } = req.query;
-    const where = {};
+app.get("/api/reviews", (req, res) => {
+  const { q, sentiment, theme } = req.query;
+  let filtered = [...reviews];
 
-    if (q) {
-      where.OR = [
-        { text: { contains: q, mode: 'insensitive' } },
-        { theme: { contains: q, mode: 'insensitive' } }
-      ];
-    }
-
-    if (sentiment && sentiment !== "All") {
-      where.sentiment = sentiment;
-    }
-
-    if (theme && theme !== "All") {
-      where.theme = { contains: theme, mode: 'insensitive' };
-    }
-
-    const reviewsList = await prisma.review.findMany({
-      where,
-      orderBy: { id: 'desc' }
-    });
-
-    res.status(200).json(reviewsList);
-  } catch (error) {
-    next(error);
+  if (q) {
+    const search = q.toLowerCase();
+    filtered = filtered.filter(r => r.text.toLowerCase().includes(search) || r.theme.toLowerCase().includes(search));
   }
+
+  if (sentiment && sentiment !== "All") {
+    filtered = filtered.filter(r => r.sentiment === sentiment);
+  }
+
+  if (theme && theme !== "All") {
+    filtered = filtered.filter(r => r.theme.toLowerCase().includes(theme.toLowerCase()));
+  }
+
+  res.status(200).json(filtered);
 });
 
 // 2. GET /api/reviews/stats — Fetch dashboard metrics summary (total, sentiment breakdown, themes)
-app.get("/api/reviews/stats", async (req, res, next) => {
-  try {
-    const reviewsList = await prisma.review.findMany();
-    const total = reviewsList.length;
-    
-    const positive = reviewsList.filter(r => r.sentiment === "Positive").length;
-    const neutral = reviewsList.filter(r => r.sentiment === "Neutral").length;
-    const negative = reviewsList.filter(r => r.sentiment === "Negative").length;
+app.get("/api/reviews/stats", (req, res) => {
+  const total = reviews.length;
+  
+  const positive = reviews.filter(r => r.sentiment === "Positive").length;
+  const neutral = reviews.filter(r => r.sentiment === "Neutral").length;
+  const negative = reviews.filter(r => r.sentiment === "Negative").length;
 
-    const positivePercent = total > 0 ? parseFloat(((positive / total) * 100).toFixed(1)) : 0;
-    const neutralPercent = total > 0 ? parseFloat(((neutral / total) * 100).toFixed(1)) : 0;
-    const negativePercent = total > 0 ? parseFloat(((negative / total) * 100).toFixed(1)) : 0;
+  const positivePercent = total > 0 ? parseFloat(((positive / total) * 100).toFixed(1)) : 0;
+  const neutralPercent = total > 0 ? parseFloat(((neutral / total) * 100).toFixed(1)) : 0;
+  const negativePercent = total > 0 ? parseFloat(((negative / total) * 100).toFixed(1)) : 0;
 
-    const themeCounts = {};
-    reviewsList.forEach(r => {
-      const parts = r.theme.split("/");
-      parts.forEach(p => {
-        themeCounts[p] = (themeCounts[p] || 0) + 1;
-      });
+  // Calculate theme occurrences percentage
+  const themeCounts = {};
+  reviews.forEach(r => {
+    // If double theme like 'Food/Host', split or tag both
+    const parts = r.theme.split("/");
+    parts.forEach(p => {
+      themeCounts[p] = (themeCounts[p] || 0) + 1;
     });
+  });
 
-    const topThemes = Object.keys(themeCounts).map(name => {
-      return {
-        name,
-        percentage: total > 0 ? Math.round((themeCounts[name] / total) * 100) : 0
-      };
-    }).sort((a, b) => b.percentage - a.percentage);
+  const topThemes = Object.keys(themeCounts).map(name => {
+    return {
+      name,
+      percentage: total > 0 ? Math.round((themeCounts[name] / total) * 100) : 0
+    };
+  }).sort((a, b) => b.percentage - a.percentage);
 
-    res.status(200).json({
-      totalReviews: total,
-      positiveCount: positive,
-      neutralCount: neutral,
-      negativeCount: negative,
-      positivePercent,
-      neutralPercent,
-      negativePercent,
-      topThemes
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(200).json({
+    totalReviews: total,
+    positiveCount: positive,
+    neutralCount: neutral,
+    negativeCount: negative,
+    positivePercent,
+    neutralPercent,
+    negativePercent,
+    topThemes
+  });
 });
 
 // 3. GET /api/reviews/:id — Fetch a single review by id
-app.get("/api/reviews/:id", async (req, res, next) => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ error: "Invalid review ID" });
-    }
+app.get("/api/reviews/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const review = reviews.find(r => r.id === id);
 
-    const review = await prisma.review.findUnique({
-      where: { id }
-    });
-
-    if (!review) {
-      return res.status(404).json({ error: "Review not found" });
-    }
-
-    res.status(200).json(review);
-  } catch (error) {
-    next(error);
+  if (!review) {
+    return res.status(404).json({ error: "Review not found" });
   }
+
+  res.status(200).json(review);
 });
 
 // 4. POST /api/reviews — Paste text and parse reviews line-by-line using NLP keyword processor
-app.post("/api/reviews", async (req, res, next) => {
-  try {
-    const { text, tone, language } = req.body;
+app.post("/api/reviews", (req, res) => {
+  const { text, tone, language } = req.body;
 
-    if (!text || typeof text !== "string" || !text.trim()) {
-      return res.status(400).json({ error: "Reviews text content is required" });
-    }
-
-    const lines = text
-      .split("\n")
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-
-    if (lines.length === 0) {
-      return res.status(400).json({ error: "No non-empty review lines found" });
-    }
-
-    const parsedReviews = lines.map((line, idx) => parseReviewNLP(line, idx, tone, language));
-
-    // Exclude the mock temporary IDs so PostgreSQL can autoincrement the primary key
-    const reviewsToInsert = parsedReviews.map(({ id, ...rest }) => rest);
-
-    // Batch insert and return created reviews with database-assigned IDs
-    const createdReviews = await prisma.review.createManyAndReturn({
-      data: reviewsToInsert
-    });
-
-    res.status(201).json(createdReviews);
-  } catch (error) {
-    next(error);
+  if (!text || typeof text !== "string" || !text.trim()) {
+    return res.status(400).json({ error: "Reviews text content is required" });
   }
+
+  const lines = text
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  if (lines.length === 0) {
+    return res.status(400).json({ error: "No non-empty review lines found" });
+  }
+
+  const newReviews = lines.map((line, idx) => parseReviewNLP(line, idx, tone, language));
+
+  // Add to local database
+  reviews = [...newReviews, ...reviews];
+
+  res.status(201).json(newReviews);
 });
 
 // 5. PUT /api/reviews/:id — Update a review (e.g., editing the suggested response)
-app.put("/api/reviews/:id", async (req, res, next) => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ error: "Invalid review ID" });
-    }
+app.put("/api/reviews/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const reviewIndex = reviews.findIndex(r => r.id === id);
 
-    const { text, sentiment, theme, suggestedResponse } = req.body;
-
-    const data = {};
-    if (text !== undefined) data.text = text;
-    if (sentiment !== undefined) data.sentiment = sentiment;
-    if (theme !== undefined) data.theme = theme;
-    if (suggestedResponse !== undefined) data.suggestedResponse = suggestedResponse;
-
-    const existing = await prisma.review.findUnique({
-      where: { id }
-    });
-
-    if (!existing) {
-      return res.status(404).json({ error: "Review not found" });
-    }
-
-    const updatedReview = await prisma.review.update({
-      where: { id },
-      data
-    });
-
-    res.status(200).json(updatedReview);
-  } catch (error) {
-    next(error);
+  if (reviewIndex === -1) {
+    return res.status(404).json({ error: "Review not found" });
   }
+
+  const { text, sentiment, theme, suggestedResponse } = req.body;
+
+  // Update only fields that are provided
+  const updatedReview = { ...reviews[reviewIndex] };
+
+  if (text !== undefined) updatedReview.text = text;
+  if (sentiment !== undefined) updatedReview.sentiment = sentiment;
+  if (theme !== undefined) updatedReview.theme = theme;
+  if (suggestedResponse !== undefined) updatedReview.suggestedResponse = suggestedResponse;
+
+  reviews[reviewIndex] = updatedReview;
+
+  res.status(200).json(updatedReview);
 });
 
 // 6. DELETE /api/reviews/:id — Delete a review by ID
-app.delete("/api/reviews/:id", async (req, res, next) => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ error: "Invalid review ID" });
-    }
+app.delete("/api/reviews/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const reviewIndex = reviews.findIndex(r => r.id === id);
 
-    const existing = await prisma.review.findUnique({
-      where: { id }
-    });
-
-    if (!existing) {
-      return res.status(404).json({ error: "Review not found" });
-    }
-
-    await prisma.review.delete({
-      where: { id }
-    });
-
-    res.status(204).send();
-  } catch (error) {
-    next(error);
+  if (reviewIndex === -1) {
+    return res.status(404).json({ error: "Review not found" });
   }
+
+  reviews.splice(reviewIndex, 1);
+
+  res.status(204).send(); // No Content response on successful deletion
 });
 
 // 7. POST /api/reviews/reset — Restore database to initial default reviews
-app.post("/api/reviews/reset", async (req, res, next) => {
-  try {
-    await prisma.review.deleteMany();
-
-    const initialReviews = [
-      {
-        text: "The food was amazing and host was very friendly and helpful",
-        sentiment: "Positive",
-        theme: "Food/Host",
-        date: "2 May 2026",
-        suggestedResponse: "Thank you so much! Our hospitality staff is always thrilled to serve our guests."
-      },
-      {
-        text: "Room was clean and location is near to the beach",
-        sentiment: "Positive",
-        theme: "Cleanliness",
-        date: "13 May 2026",
-        suggestedResponse: "Thank you! We take pride in keeping our rooms clean and comfortable for our guests."
-      },
-      {
-        text: "The WiFi was slow and the TV did not work",
-        sentiment: "Negative",
-        theme: "Facilities",
-        date: "28 May 2026",
-        suggestedResponse: "We are sorry for the inconvenience caused. We will check the facility issues and correct them immediately."
-      },
-      {
-        text: "Bathroom was not clean and smelled bad.",
-        sentiment: "Negative",
-        theme: "Cleanliness",
-        date: "9 May 2026",
-        suggestedResponse: "We apologize for the cleanliness issues. We have flagged this with our housekeeping team to resolve immediately."
-      },
-      {
-        text: "Good value for money. I will come back again",
-        sentiment: "Positive",
-        theme: "Value",
-        date: "30 Apr 2026",
-        suggestedResponse: "Great value is what we strive to offer! We are happy your stay was worth it."
-      }
-    ];
-
-    await prisma.review.createMany({
-      data: initialReviews
-    });
-
-    res.status(200).json({ message: "Database reset to initial mock data" });
-  } catch (error) {
-    next(error);
-  }
+app.post("/api/reviews/reset", (req, res) => {
+  reviews = [
+    {
+      id: 1,
+      text: "The food was amazing and host was very friendly and helpful",
+      sentiment: "Positive",
+      theme: "Food/Host",
+      date: "2 May 2026",
+      suggestedResponse: "Thank you so much! Our hospitality staff is always thrilled to serve our guests."
+    },
+    {
+      id: 2,
+      text: "Room was clean and location is near to the beach",
+      sentiment: "Positive",
+      theme: "Cleanliness",
+      date: "13 May 2026",
+      suggestedResponse: "Thank you! We take pride in keeping our rooms clean and comfortable for our guests."
+    },
+    {
+      id: 3,
+      text: "The WiFi was slow and the TV did not work",
+      sentiment: "Negative",
+      theme: "Facilities",
+      date: "28 May 2026",
+      suggestedResponse: "We are sorry for the inconvenience caused. We will check the facility issues and correct them immediately."
+    },
+    {
+      id: 4,
+      text: "Bathroom was not clean and smelled bad.",
+      sentiment: "Negative",
+      theme: "Cleanliness",
+      date: "9 May 2026",
+      suggestedResponse: "We apologize for the cleanliness issues. We have flagged this with our housekeeping team to resolve immediately."
+    },
+    {
+      id: 5,
+      text: "Good value for money. I will come back again",
+      sentiment: "Positive",
+      theme: "Value",
+      date: "30 Apr 2026",
+      suggestedResponse: "Great value is what we strive to offer! We are happy your stay was worth it."
+    }
+  ];
+  res.status(200).json({ message: "Database reset to initial mock data" });
 });
 
 // Global error handling middleware
