@@ -1,9 +1,11 @@
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "../context/authContext";
 
 function DashboardLayout({ darkMode, setDarkMode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Load user profile data from localStorage
@@ -21,6 +23,7 @@ function DashboardLayout({ darkMode, setDarkMode }) {
 
     window.addEventListener("storage", handleStorageChange);
     // Also listen for custom event when updating in same tab
+    window.dispatchEvent(new Event("profileUpdated")); // In case we need to trigger
     window.addEventListener("profileUpdated", handleStorageChange);
 
     return () => {
@@ -86,7 +89,7 @@ function DashboardLayout({ darkMode, setDarkMode }) {
   ];
 
   const handleLogout = () => {
-    navigate("/");
+    logout();
   };
 
   return (

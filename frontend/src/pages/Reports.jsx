@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import Loader from "../components/ui/Loader";
+import { useAuth } from "../context/authContext";
 
 function Reports({ darkMode }) {
+  const { apiFetch } = useAuth();
   const [dateRange, setDateRange] = useState("30-days");
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ function Reports({ darkMode }) {
   // Fetch all reviews from backend API to compute live report stats
   const fetchAllReviews = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/reviews");
+      const response = await apiFetch("/api/reviews");
       if (response.ok) {
         const data = await response.json();
         setReviews(data);

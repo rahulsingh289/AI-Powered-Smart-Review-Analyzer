@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 
 function Settings({ darkMode }) {
   const navigate = useNavigate();
+  const { apiFetch, logout } = useAuth();
 
   // Load values from localStorage or default
   const [name, setName] = useState(() => localStorage.getItem("settings_name") || "Rahul Singh");
@@ -117,7 +119,7 @@ function Settings({ darkMode }) {
     setShowDeleteModal(false);
     try {
       // Reset backend database reviews
-      await fetch("http://localhost:5001/api/reviews/reset", {
+      await apiFetch("/api/reviews/reset", {
         method: "POST"
       });
     } catch (error) {
@@ -127,9 +129,7 @@ function Settings({ darkMode }) {
     // Clear all settings in local storage
     localStorage.clear();
     alert("Profile deleted. Settings and review database restored to default settings.");
-    
-    // Redirect to landing page
-    navigate("/");
+    logout();
   };
 
   return (

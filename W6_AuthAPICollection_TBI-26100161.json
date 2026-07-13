@@ -1,0 +1,603 @@
+{
+  "info": {
+    "name": "W6 Auth API Collection - TBI-26100161",
+    "description": "Complete authentication API collection including register, login, OAuth, protected routes, and rate limiting tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "test_email",
+      "value": "testuser@example.com",
+      "type": "string"
+    },
+    {
+      "key": "test_password",
+      "value": "Test123456",
+      "type": "string"
+    },
+    {
+      "key": "test_name",
+      "value": "Test User",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Register New User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test successful registration",
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    ",
+                  "    // Save JWT token to environment variable",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "    ",
+                  "    // Validate response structure",
+                  "    pm.test('Response has token', function() {",
+                  "        pm.expect(jsonData).to.have.property('token');",
+                  "    });",
+                  "    ",
+                  "    pm.test('Response has user object', function() {",
+                  "        pm.expect(jsonData).to.have.property('user');",
+                  "        pm.expect(jsonData.user).to.have.property('email');",
+                  "        pm.expect(jsonData.user).to.have.property('name');",
+                  "    });",
+                  "    ",
+                  "    pm.test('Status code is 201', function() {",
+                  "        pm.response.to.have.status(201);",
+                  "    });",
+                  "    ",
+                  "    console.log('JWT Token saved:', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"name\": \"{{test_name}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user account. Returns JWT token on success.\n\n**Input Validation:**\n- Email: Must be valid email format\n- Password: Minimum 6 characters\n- Name: Minimum 2 characters\n\n**Rate Limit:** 5 requests per 15 minutes per IP"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Login with Email/Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test successful login",
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    ",
+                  "    // Save JWT token to environment variable",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "    ",
+                  "    // Validate response",
+                  "    pm.test('Login successful', function() {",
+                  "        pm.expect(jsonData).to.have.property('token');",
+                  "        pm.expect(jsonData).to.have.property('message');",
+                  "    });",
+                  "    ",
+                  "    pm.test('Token is not empty', function() {",
+                  "        pm.expect(jsonData.token).to.be.a('string').and.not.empty;",
+                  "    });",
+                  "    ",
+                  "    console.log('Logged in successfully. Token:', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with email and password. Returns JWT token.\n\n**Input Validation:**\n- Email: Must be valid email format\n- Password: Required (minimum 1 character)\n\n**Rate Limit:** 5 requests per 15 minutes per IP\n\n**Error Codes:**\n- 401: Invalid credentials\n- 429: Too many attempts"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Login with Invalid Credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 401 Unauthorized', function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Error message exists', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Test login with invalid credentials. Should return 401 error."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Test Rate Limiting (Will Fail After 5 Attempts)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// After 5+ requests in 15 minutes, should return 429",
+                  "if (pm.response.code === 429) {",
+                  "    pm.test('Rate limit triggered - 429 Too Many Requests', function() {",
+                  "        pm.response.to.have.status(429);",
+                  "    });",
+                  "    ",
+                  "    pm.test('Rate limit error message exists', function() {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('error');",
+                  "        pm.expect(jsonData.error).to.include('Too many');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Rate limit not yet triggered. Try again (max 5 attempts per 15 min)');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ratelimit@test.com\",\n  \"password\": \"test123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Test rate limiting on login endpoint.\n\n**Rate Limit:** 5 requests per 15 minutes per IP\n\n**Instructions:**\n1. Run this request 6 times rapidly\n2. The 6th request should return 429 Too Many Requests\n3. Wait 15 minutes to reset the limit"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Google OAuth Login (Firebase Verified)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"oauth.user@gmail.com\",\n  \"name\": \"OAuth Test User\",\n  \"googleId\": \"google_uid_12345678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/google-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "google-login"]
+            },
+            "description": "Backend endpoint for Firebase-verified Google OAuth login.\n\n**Note:** This endpoint expects the frontend to:\n1. Authenticate with Firebase\n2. Extract user data from Firebase token\n3. Send verified user data to backend\n4. Backend creates/updates user and returns JWT\n\n**Required Fields:**\n- email: User's Google email\n- googleId: Firebase UID\n- name: User's display name (optional)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints including registration, login, OAuth, and rate limiting tests"
+    },
+    {
+      "name": "Protected Routes",
+      "item": [
+        {
+          "name": "1. Get All Reviews (Protected)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Returns array of reviews', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Authorization header is present', function() {",
+                  "    pm.expect(pm.request.headers.get('Authorization')).to.include('Bearer');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"],
+              "query": []
+            },
+            "description": "Fetch all reviews for the authenticated user.\n\n**Authentication Required:** JWT Bearer token\n\n**Query Parameters (Optional):**\n- q: Search query\n- sentiment: Filter by sentiment (Positive, Negative, Neutral)\n- theme: Filter by theme\n\n**Returns:** Array of review objects"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Dashboard Stats (Protected)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains stats', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('totalReviews');",
+                  "    pm.expect(jsonData).to.have.property('positiveCount');",
+                  "    pm.expect(jsonData).to.have.property('negativeCount');",
+                  "    pm.expect(jsonData).to.have.property('topThemes');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "stats"]
+            },
+            "description": "Get dashboard statistics for authenticated user's reviews.\n\n**Authentication Required:** JWT Bearer token\n\n**Returns:**\n- totalReviews: Total number of reviews\n- positiveCount, neutralCount, negativeCount: Sentiment breakdown\n- positivePercent, neutralPercent, negativePercent: Percentages\n- topThemes: Array of themes with percentages"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Create New Review (Protected)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Reviews were created', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"The service was excellent and staff were very helpful\\nThe room was clean and comfortable\\nLocation was perfect for our needs\",\n  \"tone\": \"Professional\",\n  \"language\": \"English\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"]
+            },
+            "description": "Analyze and create reviews from text input.\n\n**Authentication Required:** JWT Bearer token\n\n**Request Body:**\n- text: Multi-line review text (one review per line)\n- tone: Response tone (Professional, Casual, Empathetic, Concise)\n- language: Response language (English, Spanish, French, German)\n\n**AI Processing:**\n- Sentiment analysis (Positive/Negative/Neutral)\n- Theme classification\n- Suggested response generation"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Access Protected Route WITHOUT Token (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 401 Unauthorized', function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Error message indicates no token', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.error).to.include('token');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"]
+            },
+            "description": "Test accessing a protected route without authentication.\n\n**Expected:** 401 Unauthorized error\n\n**Note:** This demonstrates that the JWT middleware is working correctly and blocking unauthenticated requests."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Access Protected Route WITH Invalid Token (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 401 Unauthorized', function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Error indicates invalid token', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalid.jwt.token.here",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews"]
+            },
+            "description": "Test accessing a protected route with an invalid JWT token.\n\n**Expected:** 401 Unauthorized error\n\n**Note:** This verifies that the JWT verification is working and rejecting invalid tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Update Review (Protected)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sentiment\": \"Positive\",\n  \"suggestedResponse\": \"Thank you for the updated feedback!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "1"]
+            },
+            "description": "Update an existing review.\n\n**Authentication Required:** JWT Bearer token\n\n**Note:** Replace '1' in the URL with an actual review ID from your database.\n\n**Updatable Fields:**\n- text\n- sentiment\n- theme\n- suggestedResponse"
+          },
+          "response": []
+        },
+        {
+          "name": "7. Delete Review (Protected)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "1"]
+            },
+            "description": "Delete a review by ID.\n\n**Authentication Required:** JWT Bearer token\n\n**Note:** Replace '1' with an actual review ID.\n\n**Returns:** 204 No Content on success"
+          },
+          "response": []
+        },
+        {
+          "name": "8. Reset Reviews to Default (Protected)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviews/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reviews", "reset"]
+            },
+            "description": "Reset all reviews to initial default set.\n\n**Authentication Required:** JWT Bearer token\n\n**Warning:** This deletes all user reviews and restores the default 5 sample reviews."
+          },
+          "response": []
+        }
+      ],
+      "description": "Protected API endpoints that require JWT authentication. These demonstrate the requireAuth middleware in action."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script for all requests",
+          "console.log('Base URL:', pm.collectionVariables.get('baseUrl'));",
+          "",
+          "const token = pm.collectionVariables.get('jwt_token');",
+          "if (token) {",
+          "    console.log('JWT Token available (length: ' + token.length + ')');",
+          "} else {",
+          "    console.log('No JWT token set. Run login/register first.');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script",
+          "pm.test('Response time is acceptable', function() {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "pm.test('Response has JSON content-type', function() {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.include('json');",
+          "});"
+        ]
+      }
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import Loader from "../components/ui/Loader";
+import { useAuth } from "../context/authContext";
 
 function Dashboard({ darkMode }) {
+  const { apiFetch } = useAuth();
   const [stats, setStats] = useState(null);
   const [recentReviews, setRecentReviews] = useState([]);
   const [sentimentFilter, setSentimentFilter] = useState("All");
@@ -10,7 +12,7 @@ function Dashboard({ darkMode }) {
   // Fetch dashboard stats from backend REST API
   const fetchStats = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/reviews/stats");
+      const response = await apiFetch("/api/reviews/stats");
       if (response.ok) {
         const data = await response.json();
         setStats(data);
@@ -23,7 +25,7 @@ function Dashboard({ darkMode }) {
   // Fetch filtered reviews from backend REST API
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/reviews?sentiment=${sentimentFilter}`);
+      const response = await apiFetch(`/api/reviews?sentiment=${sentimentFilter}`);
       if (response.ok) {
         const data = await response.json();
         setRecentReviews(data.slice(0, 5)); // Limit to top 5 recent reviews for dashboard

@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
+import rateLimit from "express-rate-limit";
+import passport from "passport";
+import authRouter from "./authRoutes.js";
+import { requireAuth } from "./authMiddleware.js";
 
 dotenv.config();
 
@@ -16,6 +20,23 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(passport.initialize());
+
+// Rate Limiter for Authentication routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { error: "Too many login/registration attempts from this IP, please try again after 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting specifically to register and login routes
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+
+// Mount authentication router
+app.use("/api/auth", authRouter);
 
 // Seed database if empty on startup
 const seedIfEmpty = async () => {
@@ -83,13 +104,13 @@ const translateText = (text, targetLang) => {
     } else if (text.includes("We apologize for the service issues")) {
       translated = "Nos disculpamos por los problemas de servicio. Hemos compartido esto con nuestro equipo para mejorar.";
     }
-    
+
     if (translated === text) {
       return "[Traducido]: " + text;
     }
     return translated;
   }
-  
+
   if (targetLang === "French") {
     let translated = text;
     if (text.includes("We apologize for the cleanliness issues")) {
@@ -101,7 +122,7 @@ const translateText = (text, targetLang) => {
     } else if (text.includes("We apologize for the service issues")) {
       translated = "Nous nous excusons pour les problèmes de service. Nous avons partagé cela avec notre équipe pour nous améliorer.";
     }
-    
+
     if (translated === text) {
       return "[Traduit]: " + text;
     }
@@ -119,7 +140,7 @@ const translateText = (text, targetLang) => {
     } else if (text.includes("We apologize for the service issues")) {
       translated = "Wir entschuldigen uns für die Serviceprobleme. Wir haben dies mit unserem Team besprochen.";
     }
-    
+
     if (translated === text) {
       return "[Übersetzt]: " + text;
     }
@@ -136,24 +157,24 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
   let response = "Thank you so much for your kind words! We are happy you enjoyed your stay.";
 
   const lower = line.toLowerCase();
-  
+
   // Keyword lists
   const negativeWords = [
-    "dirty", "smell", "bad", "slow", "broken", "not work", "poor", "expensive", 
-    "overpriced", "rude", "cold", "disappointed", "worst", "terrible", "annoying", 
-    "uncomfortable", "horrible", "awful", "ugly", "unprofessional", "waste", 
+    "dirty", "smell", "bad", "slow", "broken", "not work", "poor", "expensive",
+    "overpriced", "rude", "cold", "disappointed", "worst", "terrible", "annoying",
+    "uncomfortable", "horrible", "awful", "ugly", "unprofessional", "waste",
     "disgusting", "nasty", "horrid", "dislike", "hate", "unfriendly", "unhelpful",
     "noisy", "loud", "crowded", "smelly", "dusty", "stain", "stained", "messy"
   ];
   const positiveWords = [
-    "amazing", "friendly", "helpful", "clean", "location", "near", "good", "great", 
-    "value", "comfort", "nice", "excellent", "wonderful", "perfect", "love", 
+    "amazing", "friendly", "helpful", "clean", "location", "near", "good", "great",
+    "value", "comfort", "nice", "excellent", "wonderful", "perfect", "love",
     "tasty", "delicious", "happy", "pleased", "satisfied", "enjoyed", "best",
     "brilliant", "fantastic", "awesome", "spotless", "welcoming", "cosy", "cozy",
     "superb", "satisfying", "pleasant", "recommend"
   ];
   const neutralWords = [
-    "ok", "okay", "average", "decent", "fine", "normal", "mediocre", 
+    "ok", "okay", "average", "decent", "fine", "normal", "mediocre",
     "moderate", "so-so", "satisfactory", "but", "though", "however"
   ];
 
@@ -163,9 +184,9 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
 
   // Negation check
   const negatedPositivePhrases = [
-    "not clean", "not friendly", "not helpful", "not good", "not great", 
-    "not nice", "not comfortable", "no wifi", "no tv", "not enjoy", 
-    "not satisfied", "not happy", "did not like", "didn't like", 
+    "not clean", "not friendly", "not helpful", "not good", "not great",
+    "not nice", "not comfortable", "no wifi", "no tv", "not enjoy",
+    "not satisfied", "not happy", "did not like", "didn't like",
     "dont like", "don't like", "not worth", "no value", "not value",
     "not working", "not work"
   ];
@@ -326,12 +347,69 @@ const parseReviewNLP = (line, idx, tone = "Professional", language = "English") 
     suggestedResponse: response
   };
 };
-
-// 1. GET /api/reviews — List all reviews (with optional search, sentiment, and theme filters)
-app.get("/api/reviews", async (req, res, next) => {
+// Helper to seed default reviews for a user if they have none
+const seedUserReviews = async (userId) => {
   try {
+    const count = await prisma.review.count({ where: { userId } });
+    if (count === 0) {
+      const initialReviews = [
+        {
+          text: "The food was amazing and host was very friendly and helpful",
+          sentiment: "Positive",
+          theme: "Food/Host",
+          date: "2 May 2026",
+          suggestedResponse: "Thank you so much! Our hospitality staff is always thrilled to serve our guests.",
+          userId
+        },
+        {
+          text: "Room was clean and location is near to the beach",
+          sentiment: "Positive",
+          theme: "Cleanliness",
+          date: "13 May 2026",
+          suggestedResponse: "Thank you! We take pride in keeping our rooms clean and comfortable for our guests.",
+          userId
+        },
+        {
+          text: "The WiFi was slow and the TV did not work",
+          sentiment: "Negative",
+          theme: "Facilities",
+          date: "28 May 2026",
+          suggestedResponse: "We are sorry for the inconvenience caused. We will check the facility issues and correct them immediately.",
+          userId
+        },
+        {
+          text: "Bathroom was not clean and smelled bad.",
+          sentiment: "Negative",
+          theme: "Cleanliness",
+          date: "9 May 2026",
+          suggestedResponse: "We apologize for the cleanliness issues. We have flagged this with our housekeeping team to resolve immediately.",
+          userId
+        },
+        {
+          text: "Good value for money. I will come back again",
+          sentiment: "Positive",
+          theme: "Value",
+          date: "30 Apr 2026",
+          suggestedResponse: "Great value is what we strive to offer! We are happy your stay was worth it.",
+          userId
+        }
+      ];
+      await prisma.review.createMany({
+        data: initialReviews
+      });
+      console.log(`Seeded default reviews for user ${userId}`);
+    }
+  } catch (error) {
+    console.error(`Error auto-seeding user reviews for user ${userId}:`, error);
+  }
+};
+
+// 1. GET /api/reviews — List all reviews for the current user
+app.get("/api/reviews", requireAuth, async (req, res, next) => {
+  try {
+    await seedUserReviews(req.user.id);
     const { q, sentiment, theme } = req.query;
-    const where = {};
+    const where = { userId: req.user.id };
 
     if (q) {
       where.OR = [
@@ -359,12 +437,15 @@ app.get("/api/reviews", async (req, res, next) => {
   }
 });
 
-// 2. GET /api/reviews/stats — Fetch dashboard metrics summary (total, sentiment breakdown, themes)
-app.get("/api/reviews/stats", async (req, res, next) => {
+// 2. GET /api/reviews/stats — Fetch dashboard metrics for the current user
+app.get("/api/reviews/stats", requireAuth, async (req, res, next) => {
   try {
-    const reviewsList = await prisma.review.findMany();
+    await seedUserReviews(req.user.id);
+    const reviewsList = await prisma.review.findMany({
+      where: { userId: req.user.id }
+    });
     const total = reviewsList.length;
-    
+
     const positive = reviewsList.filter(r => r.sentiment === "Positive").length;
     const neutral = reviewsList.filter(r => r.sentiment === "Neutral").length;
     const negative = reviewsList.filter(r => r.sentiment === "Negative").length;
@@ -403,16 +484,16 @@ app.get("/api/reviews/stats", async (req, res, next) => {
   }
 });
 
-// 3. GET /api/reviews/:id — Fetch a single review by id
-app.get("/api/reviews/:id", async (req, res, next) => {
+// 3. GET /api/reviews/:id — Fetch a single review by id for the current user
+app.get("/api/reviews/:id", requireAuth, async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid review ID" });
     }
 
-    const review = await prisma.review.findUnique({
-      where: { id }
+    const review = await prisma.review.findFirst({
+      where: { id, userId: req.user.id }
     });
 
     if (!review) {
@@ -426,7 +507,7 @@ app.get("/api/reviews/:id", async (req, res, next) => {
 });
 
 // 4. POST /api/reviews — Paste text and parse reviews line-by-line using NLP keyword processor
-app.post("/api/reviews", async (req, res, next) => {
+app.post("/api/reviews", requireAuth, async (req, res, next) => {
   try {
     const { text, tone, language } = req.body;
 
@@ -446,7 +527,11 @@ app.post("/api/reviews", async (req, res, next) => {
     const parsedReviews = lines.map((line, idx) => parseReviewNLP(line, idx, tone, language));
 
     // Exclude the mock temporary IDs so PostgreSQL can autoincrement the primary key
-    const reviewsToInsert = parsedReviews.map(({ id, ...rest }) => rest);
+    // Inject current user's ID
+    const reviewsToInsert = parsedReviews.map(({ id, ...rest }) => ({
+      ...rest,
+      userId: req.user.id
+    }));
 
     // Batch insert and return created reviews with database-assigned IDs
     const createdReviews = await prisma.review.createManyAndReturn({
@@ -459,8 +544,8 @@ app.post("/api/reviews", async (req, res, next) => {
   }
 });
 
-// 5. PUT /api/reviews/:id — Update a review (e.g., editing the suggested response)
-app.put("/api/reviews/:id", async (req, res, next) => {
+// 5. PUT /api/reviews/:id — Update a review for the current user
+app.put("/api/reviews/:id", requireAuth, async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -475,8 +560,8 @@ app.put("/api/reviews/:id", async (req, res, next) => {
     if (theme !== undefined) data.theme = theme;
     if (suggestedResponse !== undefined) data.suggestedResponse = suggestedResponse;
 
-    const existing = await prisma.review.findUnique({
-      where: { id }
+    const existing = await prisma.review.findFirst({
+      where: { id, userId: req.user.id }
     });
 
     if (!existing) {
@@ -494,16 +579,16 @@ app.put("/api/reviews/:id", async (req, res, next) => {
   }
 });
 
-// 6. DELETE /api/reviews/:id — Delete a review by ID
-app.delete("/api/reviews/:id", async (req, res, next) => {
+// 6. DELETE /api/reviews/:id — Delete a review by ID for the current user
+app.delete("/api/reviews/:id", requireAuth, async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid review ID" });
     }
 
-    const existing = await prisma.review.findUnique({
-      where: { id }
+    const existing = await prisma.review.findFirst({
+      where: { id, userId: req.user.id }
     });
 
     if (!existing) {
@@ -520,10 +605,12 @@ app.delete("/api/reviews/:id", async (req, res, next) => {
   }
 });
 
-// 7. POST /api/reviews/reset — Restore database to initial default reviews
-app.post("/api/reviews/reset", async (req, res, next) => {
+// 7. POST /api/reviews/reset — Restore database to initial default reviews for the current user
+app.post("/api/reviews/reset", requireAuth, async (req, res, next) => {
   try {
-    await prisma.review.deleteMany();
+    await prisma.review.deleteMany({
+      where: { userId: req.user.id }
+    });
 
     const initialReviews = [
       {
@@ -531,35 +618,40 @@ app.post("/api/reviews/reset", async (req, res, next) => {
         sentiment: "Positive",
         theme: "Food/Host",
         date: "2 May 2026",
-        suggestedResponse: "Thank you so much! Our hospitality staff is always thrilled to serve our guests."
+        suggestedResponse: "Thank you so much! Our hospitality staff is always thrilled to serve our guests.",
+        userId: req.user.id
       },
       {
         text: "Room was clean and location is near to the beach",
         sentiment: "Positive",
         theme: "Cleanliness",
         date: "13 May 2026",
-        suggestedResponse: "Thank you! We take pride in keeping our rooms clean and comfortable for our guests."
+        suggestedResponse: "Thank you! We take pride in keeping our rooms clean and comfortable for our guests.",
+        userId: req.user.id
       },
       {
         text: "The WiFi was slow and the TV did not work",
         sentiment: "Negative",
         theme: "Facilities",
         date: "28 May 2026",
-        suggestedResponse: "We are sorry for the inconvenience caused. We will check the facility issues and correct them immediately."
+        suggestedResponse: "We are sorry for the inconvenience caused. We will check the facility issues and correct them immediately.",
+        userId: req.user.id
       },
       {
         text: "Bathroom was not clean and smelled bad.",
         sentiment: "Negative",
         theme: "Cleanliness",
         date: "9 May 2026",
-        suggestedResponse: "We apologize for the cleanliness issues. We have flagged this with our housekeeping team to resolve immediately."
+        suggestedResponse: "We apologize for the cleanliness issues. We have flagged this with our housekeeping team to resolve immediately.",
+        userId: req.user.id
       },
       {
         text: "Good value for money. I will come back again",
         sentiment: "Positive",
         theme: "Value",
         date: "30 Apr 2026",
-        suggestedResponse: "Great value is what we strive to offer! We are happy your stay was worth it."
+        suggestedResponse: "Great value is what we strive to offer! We are happy your stay was worth it.",
+        userId: req.user.id
       }
     ];
 
@@ -567,13 +659,11 @@ app.post("/api/reviews/reset", async (req, res, next) => {
       data: initialReviews
     });
 
-    res.status(200).json({ message: "Database reset to initial mock data" });
+    res.status(200).json({ message: "Database reset to initial mock data for user" });
   } catch (error) {
     next(error);
   }
-});
-
-// Global error handling middleware
+});// Global error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Internal Server Error" });
