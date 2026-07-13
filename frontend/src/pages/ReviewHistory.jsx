@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import Loader from "../components/ui/Loader";
+import { useAuth } from "../context/authContext";
 
 function ReviewHistory({ darkMode }) {
+  const { apiFetch } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [selectedReview, setSelectedReview] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,7 +22,7 @@ function ReviewHistory({ darkMode }) {
       if (filterSentiment !== "All") queryParams.append("sentiment", filterSentiment);
       if (filterTheme !== "All") queryParams.append("theme", filterTheme);
 
-      const response = await fetch(`http://localhost:5001/api/reviews?${queryParams.toString()}`);
+      const response = await apiFetch(`/api/reviews?${queryParams.toString()}`);
       if (response.ok) {
         const data = await response.json();
         setReviews(data);
@@ -83,7 +85,7 @@ function ReviewHistory({ darkMode }) {
   // Delete review via REST DELETE endpoint
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/reviews/${id}`, {
+      const response = await apiFetch(`/api/reviews/${id}`, {
         method: "DELETE"
       });
       if (response.ok) {
@@ -101,11 +103,8 @@ function ReviewHistory({ darkMode }) {
   const handleSaveResponse = async () => {
     if (!selectedReview) return;
     try {
-      const response = await fetch(`http://localhost:5001/api/reviews/${selectedReview.id}`, {
+      const response = await apiFetch(`/api/reviews/${selectedReview.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify({
           suggestedResponse: editedResponseText
         })

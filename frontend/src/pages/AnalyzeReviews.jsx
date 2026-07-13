@@ -1,7 +1,9 @@
 import { useState } from "react";
 import Loader from "../components/ui/Loader";
+import { useAuth } from "../context/authContext";
 
 function AnalyzeReviews({ darkMode }) {
+  const { apiFetch } = useAuth();
   const [inputText, setInputText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState([]);
@@ -14,11 +16,8 @@ function AnalyzeReviews({ darkMode }) {
     setResults([]);
 
     try {
-      const response = await fetch("http://localhost:5001/api/reviews", {
+      const response = await apiFetch("/api/reviews", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify({
           text: inputText,
           tone: localStorage.getItem("settings_ai_tone") || "Professional",
