@@ -10,6 +10,8 @@ import AnalyzeReviews from "./pages/AnalyzeReviews";
 import ReviewHistory from "./pages/ReviewHistory";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import { AuthProvider } from "./context/authContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -27,71 +29,75 @@ function App() {
   }, [darkMode]);
 
   return (
-    <div className={darkMode ? "min-h-screen bg-slate-950 text-slate-100" : "min-h-screen bg-slate-50 text-slate-900"}>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              darkMode={darkMode}
-              setDarkMode={setDarkMode}
-            />
-          }
-        />
+    <AuthProvider>
+      <div className={darkMode ? "min-h-screen bg-slate-950 text-slate-100" : "min-h-screen bg-slate-50 text-slate-900"}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+              />
+            }
+          />
 
-        <Route
-          path="/about"
-          element={
-            <About
-              darkMode={darkMode}
-              setDarkMode={setDarkMode}
-            />
-          }
-        />
+          <Route
+            path="/about"
+            element={
+              <About
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+              />
+            }
+          />
 
-        <Route
-          path="/login"
-          element={
-            <Login
-              darkMode={darkMode}
-              setDarkMode={setDarkMode}
-            />
-          }
-        />
+          <Route
+            path="/login"
+            element={
+              <Login
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+              />
+            }
+          />
 
-        {/* Dashboard nested routing */}
-        <Route
-          path="/dashboard"
-          element={
-            <DashboardLayout
-              darkMode={darkMode}
-              setDarkMode={setDarkMode}
+          {/* Dashboard nested routing */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout
+                  darkMode={darkMode}
+                  setDarkMode={setDarkMode}
+                />
+              </ProtectedRoute>
+            }
+          >
+            <Route
+              index
+              element={<Dashboard darkMode={darkMode} />}
             />
-          }
-        >
-          <Route
-            index
-            element={<Dashboard darkMode={darkMode} />}
-          />
-          <Route
-            path="analyze"
-            element={<AnalyzeReviews darkMode={darkMode} />}
-          />
-          <Route
-            path="history"
-            element={<ReviewHistory darkMode={darkMode} />}
-          />
-          <Route
-            path="reports"
-            element={<Reports darkMode={darkMode} />}
-          />
-          <Route
-            path="settings"
-            element={<Settings darkMode={darkMode} />}
-          />
-        </Route>
-      </Routes>
-    </div>
+            <Route
+              path="analyze"
+              element={<AnalyzeReviews darkMode={darkMode} />}
+            />
+            <Route
+              path="history"
+              element={<ReviewHistory darkMode={darkMode} />}
+            />
+            <Route
+              path="reports"
+              element={<Reports darkMode={darkMode} />}
+            />
+            <Route
+              path="settings"
+              element={<Settings darkMode={darkMode} />}
+            />
+          </Route>
+        </Routes>
+      </div>
+    </AuthProvider>
   );
 }
 
