@@ -217,24 +217,25 @@ router.post("/google-login", async (req, res, next) => {
       return res.status(400).json({ error: "Email and Google ID are required" });
     }
 
-    let user = await prisma.user.findUnique({ where: { email } });
-    if (user) {
-      // If user exists but googleId is not linked, link it
-      if (!user.googleId) {
+    let user = await prisma.user.findUnique({ where: { googleId } });
+    if (!user) {
+      user = await prisma.user.findUnique({ where: { email } });
+      if (user) {
+        // Link Google ID to existing account
         user = await prisma.user.update({
           where: { email },
           data: { googleId }
         });
+      } else {
+        // Create new user
+        user = await prisma.user.create({
+          data: {
+            email,
+            name: name || email.split("@")[0],
+            googleId
+          }
+        });
       }
-    } else {
-      // Create new user (leaving password null since it's an OAuth user)
-      user = await prisma.user.create({
-        data: {
-          email,
-          name: name || email.split("@")[0],
-          googleId
-        }
-      });
     }
 
     const token = generateToken(user);
