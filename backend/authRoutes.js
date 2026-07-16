@@ -2,13 +2,13 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-import { PrismaClient } from "@prisma/client";
+import prisma from "./prisma.js";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
+import { requireAuth } from "./authMiddleware.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey_week6_auth_and_security";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
@@ -75,7 +75,13 @@ router.post("/register", async (req, res, next) => {
       user: {
         id: newUser.id,
         email: newUser.email,
-        name: newUser.name
+        name: newUser.name,
+        phone: newUser.phone,
+        prefWeeklyReport: newUser.prefWeeklyReport,
+        prefMonthlyReport: newUser.prefMonthlyReport,
+        prefNegativeAlerts: newUser.prefNegativeAlerts,
+        prefSecurityAlerts: newUser.prefSecurityAlerts,
+        prefMarketing: newUser.prefMarketing
       }
     });
   } catch (error) {
@@ -117,7 +123,13 @@ router.post("/login", async (req, res, next) => {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
+        name: user.name,
+        phone: user.phone,
+        prefWeeklyReport: user.prefWeeklyReport,
+        prefMonthlyReport: user.prefMonthlyReport,
+        prefNegativeAlerts: user.prefNegativeAlerts,
+        prefSecurityAlerts: user.prefSecurityAlerts,
+        prefMarketing: user.prefMarketing
       }
     });
   } catch (error) {
@@ -232,7 +244,171 @@ router.post("/google-login", async (req, res, next) => {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
+        name: user.name,
+        phone: user.phone,
+        prefWeeklyReport: user.prefWeeklyReport,
+        prefMonthlyReport: user.prefMonthlyReport,
+        prefNegativeAlerts: user.prefNegativeAlerts,
+        prefSecurityAlerts: user.prefSecurityAlerts,
+        prefMarketing: user.prefMarketing
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 6. PUT /api/auth/profile — Update user's profile details
+router.put("/profile", requireAuth, async (req, res, next) => {
+  try {
+    const { name, email, phone } = req.body;
+    const updateData = {};
+
+    if (name !== undefined) {
+      if (name.trim().length < 2) {
+        return res.status(400).json({ error: "Name must be at least 2 characters" });
+      }
+      updateData.name = name.trim();
+    }
+
+    if (email !== undefined) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Please provide a valid email address" });
+      }
+
+      // Check if email is already taken by another user
+      const existingUser = await prisma.user.findUnique({
+        where: { email: email.trim() }
+      });
+      if (existingUser && existingUser.id !== req.user.id) {
+        return res.status(400).json({ error: "Email is already taken by another user" });
+      }
+      updateData.email = email.trim();
+    }
+
+    if (phone !== undefined) {
+      updateData.phone = phone ? phone.trim() : null;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "No update fields provided" });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData
+    });
+
+    // Generate new JWT with updated profile details
+    const token = generateToken(updatedUser);
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      token,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        phone: updatedUser.phone,
+        prefWeeklyReport: updatedUser.prefWeeklyReport,
+        prefMonthlyReport: updatedUser.prefMonthlyReport,
+        prefNegativeAlerts: updatedUser.prefNegativeAlerts,
+        prefSecurityAlerts: updatedUser.prefSecurityAlerts,
+        prefMarketing: updatedUser.prefMarketing
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 7. PUT /api/auth/change-password — Update password
+router.put("/change-password", requireAuth, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current and new passwords are required" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+
+    // Find user in database
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user || !user.password) {
+      return res.status(400).json({ error: "User not found or password cannot be changed (OAuth account)" });
+    }
+
+    // Check current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Incorrect current password" });
+    }
+
+    // Hash new password
+    const saltRounds = 11;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update in database
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { password: hashedPassword }
+    });
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 8. DELETE /api/auth/account — Delete account permanently
+router.delete("/account", requireAuth, async (req, res, next) => {
+  try {
+    // Delete user from database (reviews deletion cascades)
+    await prisma.user.delete({
+      where: { id: req.user.id }
+    });
+    res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 9. PUT /api/auth/preferences — Update user's email preferences
+router.put("/preferences", requireAuth, async (req, res, next) => {
+  try {
+    const { 
+      prefWeeklyReport, 
+      prefMonthlyReport, 
+      prefNegativeAlerts, 
+      prefSecurityAlerts, 
+      prefMarketing 
+    } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        prefWeeklyReport: prefWeeklyReport !== undefined ? Boolean(prefWeeklyReport) : undefined,
+        prefMonthlyReport: prefMonthlyReport !== undefined ? Boolean(prefMonthlyReport) : undefined,
+        prefNegativeAlerts: prefNegativeAlerts !== undefined ? Boolean(prefNegativeAlerts) : undefined,
+        prefSecurityAlerts: prefSecurityAlerts !== undefined ? Boolean(prefSecurityAlerts) : undefined,
+        prefMarketing: prefMarketing !== undefined ? Boolean(prefMarketing) : undefined,
+      }
+    });
+
+    res.status(200).json({
+      message: "Preferences updated successfully",
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        phone: updatedUser.phone,
+        prefWeeklyReport: updatedUser.prefWeeklyReport,
+        prefMonthlyReport: updatedUser.prefMonthlyReport,
+        prefNegativeAlerts: updatedUser.prefNegativeAlerts,
+        prefSecurityAlerts: updatedUser.prefSecurityAlerts,
+        prefMarketing: updatedUser.prefMarketing
       }
     });
   } catch (error) {

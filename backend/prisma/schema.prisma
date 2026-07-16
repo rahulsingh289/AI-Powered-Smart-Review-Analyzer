@@ -8,14 +8,20 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  password  String?
-  googleId  String?  @unique
-  githubId  String?  @unique
-  createdAt DateTime @default(now())
-  reviews   Review[]
+  id                 Int      @id @default(autoincrement())
+  email              String   @unique
+  name               String
+  password           String?
+  phone              String?
+  googleId           String?  @unique
+  githubId           String?  @unique
+  createdAt          DateTime @default(now())
+  prefWeeklyReport   Boolean  @default(true)
+  prefMonthlyReport  Boolean  @default(true)
+  prefNegativeAlerts Boolean  @default(true)
+  prefSecurityAlerts Boolean  @default(true)
+  prefMarketing      Boolean  @default(false)
+  reviews            Review[]
 }
 
 model Review {

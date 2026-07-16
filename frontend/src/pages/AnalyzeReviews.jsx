@@ -7,16 +7,18 @@ function AnalyzeReviews({ darkMode }) {
   const [inputText, setInputText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState([]);
+  const [errorToast, setErrorToast] = useState("");
 
-  // Send reviews to backend REST API to parse and store
+  // Send reviews to backend REST API to parse and store using Gemini AI
   const handleAnalyze = async () => {
     if (!inputText.trim()) return;
 
     setIsAnalyzing(true);
     setResults([]);
+    setErrorToast("");
 
     try {
-      const response = await apiFetch("/api/reviews", {
+      const response = await apiFetch("/api/ai/analyze", {
         method: "POST",
         body: JSON.stringify({
           text: inputText,
@@ -29,11 +31,20 @@ function AnalyzeReviews({ darkMode }) {
         const data = await response.json();
         setResults(data);
       } else {
-        alert("Failed to analyze reviews. Make sure backend is running.");
+        let errMsg = "Failed to analyze reviews. Make sure backend is running.";
+        try {
+          const errData = await response.json();
+          if (errData && errData.error) {
+            errMsg = errData.error;
+          }
+        } catch (_) {}
+        setErrorToast(errMsg);
+        setTimeout(() => setErrorToast(""), 5000);
       }
     } catch (error) {
       console.error("Error analyzing reviews:", error);
-      alert("Error reaching the backend analysis engine.");
+      setErrorToast(error.message || "Error reaching the backend analysis engine.");
+      setTimeout(() => setErrorToast(""), 5000);
     } finally {
       setIsAnalyzing(false);
     }
@@ -42,10 +53,20 @@ function AnalyzeReviews({ darkMode }) {
   const handleClear = () => {
     setInputText("");
     setResults([]);
+    setErrorToast("");
   };
 
   return (
     <div className="space-y-6">
+      {/* Error Toast Alert */}
+      {errorToast && (
+        <div className="fixed top-20 right-6 z-50 bg-rose-600 text-white px-5 py-3 rounded-2xl shadow-lg font-semibold text-sm flex items-center gap-2 animate-bounce">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          {errorToast}
+        </div>
+      )}
       {/* Top Header info */}
       <div className={`p-6 rounded-3xl border shadow-sm ${
         darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
