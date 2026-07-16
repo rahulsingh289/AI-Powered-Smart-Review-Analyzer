@@ -126,6 +126,17 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+  const updateUserProfile = (updatedUser, newToken = null) => {
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+      setToken(newToken);
+    }
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    localStorage.setItem("settings_name", updatedUser.name);
+    setUser(updatedUser);
+    window.dispatchEvent(new Event("profileUpdated"));
+  };
+
   const value = {
     user,
     token,
@@ -135,6 +146,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     loginWithOAuthToken,
     apiFetch,
+    updateUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
