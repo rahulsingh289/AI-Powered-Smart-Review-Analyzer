@@ -12,32 +12,10 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Enable CORS for frontend Vite dev server origin and production deployments
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, "").trim() : null
-].filter(Boolean);
-
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    
-    const cleanedOrigin = origin.replace(/\/$/, "").trim();
-    
-    // Check if origin matches allowed list exactly or matches without protocol prefixes
-    const isAllowed = allowedOrigins.some(allowed => {
-      const standardAllowed = allowed.toLowerCase();
-      const standardOrigin = cleanedOrigin.toLowerCase();
-      
-      return standardAllowed === standardOrigin || 
-             standardOrigin.includes(standardAllowed.replace(/^https?:\/\//i, ""));
-    });
-
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
-    }
+    // Dynamically allow any requesting origin to prevent Vercel/Render CORS blockages
+    callback(null, true);
   },
   credentials: true
 }));
