@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null);
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -21,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const response = await fetch("http://localhost:5001/api/auth/login", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const response = await fetch("http://localhost:5001/api/auth/register", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
@@ -113,7 +115,7 @@ export const AuthProvider = ({ children }) => {
       headers["Authorization"] = `Bearer ${activeToken}`;
     }
 
-    const response = await fetch(`http://localhost:5001${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
     });
