@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 function Navbar({ darkMode, setDarkMode }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <nav className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-300 ${
+    <nav className={`sticky top-0 z-50 border-b backdrop-blur-md transition-all duration-300 ${
       darkMode ? "bg-slate-900/95 border-slate-800 text-slate-100" : "bg-white/95 border-slate-200 text-slate-900"
     }`}>
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -17,7 +20,7 @@ function Navbar({ darkMode, setDarkMode }) {
           </div>
         </Link>
 
-        {/* Menu Links */}
+        {/* Desktop Menu Links */}
         <div className="hidden md:flex items-center gap-8 font-semibold text-sm">
           <Link to="/" className={`transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Home</Link>
           <Link to="/about" className={`transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>About</Link>
@@ -25,8 +28,9 @@ function Navbar({ darkMode, setDarkMode }) {
           <Link to="/login" className={`transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Login</Link>
         </div>
 
-        {/* Actions */}
+        {/* Right side Actions */}
         <div className="flex items-center gap-3">
+          {/* Light/Dark Mode Toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
             className={`p-2.5 rounded-xl transition-all duration-200 border cursor-pointer ${
@@ -47,14 +51,55 @@ function Navbar({ darkMode, setDarkMode }) {
             )}
           </button>
 
+          {/* Desktop Get Started Button */}
           <Link
             to="/login"
             className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-md shadow-amber-500/20 active:scale-[0.98] transition-all"
           >
             Get Started
           </Link>
+
+          {/* Hamburger Menu Toggle (Visible on mobile/tablet) */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`p-2.5 rounded-xl md:hidden border cursor-pointer transition-colors duration-200 ${
+              darkMode ? "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700" : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200 shadow-sm"
+            }`}
+            aria-label="Toggle Navigation Menu"
+          >
+            {isOpen ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu Panel (Slide-down menu) */}
+      {isOpen && (
+        <div className={`md:hidden border-t px-6 py-4 space-y-4 ${
+          darkMode ? "bg-slate-950 border-slate-800 text-slate-200" : "bg-slate-50 border-slate-200 text-slate-700 shadow-inner"
+        }`}>
+          <div className="flex flex-col gap-4 font-semibold text-sm">
+            <Link to="/" onClick={() => setIsOpen(false)} className={`py-2 transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Home</Link>
+            <Link to="/about" onClick={() => setIsOpen(false)} className={`py-2 transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>About</Link>
+            <Link to="/dashboard" onClick={() => setIsOpen(false)} className={`py-2 transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Dashboard</Link>
+            <Link to="/login" onClick={() => setIsOpen(false)} className={`py-2 transition-colors ${darkMode ? "hover:text-amber-400" : "hover:text-amber-600"}`}>Login</Link>
+            <Link
+              to="/login"
+              onClick={() => setIsOpen(false)}
+              className="inline-flex sm:hidden items-center justify-center px-5 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-md"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
