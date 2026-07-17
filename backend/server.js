@@ -11,9 +11,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Enable CORS for frontend Vite dev server origin
+// Enable CORS for frontend Vite dev server origin and production deployments
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: allowedOrigins,
   credentials: true
 }));
 
