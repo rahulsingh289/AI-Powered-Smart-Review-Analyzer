@@ -46,9 +46,10 @@ router.post("/register", async (req, res, next) => {
     }
 
     const { email, password, name } = parseResult.data;
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Check if email already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
       return res.status(400).json({ error: "Email is already registered" });
     }
@@ -60,7 +61,7 @@ router.post("/register", async (req, res, next) => {
     // Save to database
     const newUser = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         name,
         password: hashedPassword,
       }
@@ -101,9 +102,10 @@ router.post("/login", async (req, res, next) => {
     }
 
     const { email, password } = parseResult.data;
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Find user
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user || !user.password) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
@@ -216,25 +218,27 @@ router.post("/google-login", async (req, res, next) => {
     if (!email || !googleId) {
       return res.status(400).json({ error: "Email and Google ID are required" });
     }
+    const normalizedEmail = email.trim().toLowerCase();
 
-    let user = await prisma.user.findUnique({ where: { email } });
-    if (user) {
-      // If user exists but googleId is not linked, link it
-      if (!user.googleId) {
+    let user = await prisma.user.findUnique({ where: { googleId } });
+    if (!user) {
+      user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+      if (user) {
+        // Link Google ID to existing account
         user = await prisma.user.update({
-          where: { email },
+          where: { email: normalizedEmail },
           data: { googleId }
         });
+      } else {
+        // Create new user
+        user = await prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            name: name || normalizedEmail.split("@")[0],
+            googleId
+          }
+        });
       }
-    } else {
-      // Create new user (leaving password null since it's an OAuth user)
-      user = await prisma.user.create({
-        data: {
-          email,
-          name: name || email.split("@")[0],
-          googleId
-        }
-      });
     }
 
     const token = generateToken(user);
@@ -277,14 +281,16 @@ router.put("/profile", requireAuth, async (req, res, next) => {
         return res.status(400).json({ error: "Please provide a valid email address" });
       }
 
+      const normalizedEmail = email.trim().toLowerCase();
+
       // Check if email is already taken by another user
       const existingUser = await prisma.user.findUnique({
-        where: { email: email.trim() }
+        where: { email: normalizedEmail }
       });
       if (existingUser && existingUser.id !== req.user.id) {
         return res.status(400).json({ error: "Email is already taken by another user" });
       }
-      updateData.email = email.trim();
+      updateData.email = normalizedEmail;
     }
 
     if (phone !== undefined) {

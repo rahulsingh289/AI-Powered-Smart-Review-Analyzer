@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import NavBar from "../components/NavBar";
-import { useAuth } from "../context/authContext";
+import { useAuth, API_BASE_URL } from "../context/authContext";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
@@ -126,7 +126,7 @@ function Login({ darkMode, setDarkMode }) {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       
-      const response = await fetch("http://localhost:5001/api/auth/google-login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

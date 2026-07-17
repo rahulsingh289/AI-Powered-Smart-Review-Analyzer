@@ -171,6 +171,15 @@ function Settings({ darkMode }) {
     }
   }, [user]);
 
+  // Sync settings inputs when user context changes/loads
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+      setPhone(user.phone || "");
+    }
+  }, [user]);
+
   const filteredFaqs = faqs.filter(faq => {
     const matchesSearch = faq.question.toLowerCase().includes(faqSearch.toLowerCase()) || 
                           faq.answer.toLowerCase().includes(faqSearch.toLowerCase());
