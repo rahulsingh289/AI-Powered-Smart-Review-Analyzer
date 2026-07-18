@@ -100,10 +100,14 @@ function Login({ darkMode, setDarkMode }) {
 
     try {
       await register(name, email, password);
-      setSuccess("Account registered successfully! Redirecting...");
+      setSuccess("Account registered successfully! Please log in to continue.");
+      setLoading(false);
       setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+        setPassword("");
+        setConfirmPassword("");
+        setIsSignUp(false);
+        setSuccess("");
+      }, 2000);
     } catch (err) {
       setLoading(false);
       if (err.status === 429) {
