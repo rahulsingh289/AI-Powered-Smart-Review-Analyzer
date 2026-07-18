@@ -70,15 +70,6 @@ export const AuthProvider = ({ children }) => {
       throw err;
     }
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("settings_name", data.user.name);
-
-    setToken(data.token);
-    setUser(data.user);
-    
-    window.dispatchEvent(new Event("profileUpdated"));
-
     return data;
   };
 
