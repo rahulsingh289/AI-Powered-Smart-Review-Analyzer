@@ -48,6 +48,17 @@ router.post("/register", async (req, res, next) => {
     const { email, password, name } = parseResult.data;
     const normalizedEmail = email.trim().toLowerCase();
 
+    // Reject fake/disposable email domains
+    const domain = normalizedEmail.split("@")[1];
+    const blockedDomains = [
+      "yopmail.com", "mailinator.com", "tempmail.com", "temp-mail.org",
+      "10minutemail.com", "sharklasers.com", "guerrillamail.com",
+      "dispostable.com", "getairmail.com", "burnermail.io", "fake.com", "test.com"
+    ];
+    if (blockedDomains.includes(domain)) {
+      return res.status(400).json({ error: "Registration with disposable or fake email domains is not allowed" });
+    }
+
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
